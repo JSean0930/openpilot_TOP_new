@@ -108,11 +108,11 @@ def get_dynamic_follow(v_ego, personality=log.LongitudinalPersonality.standard):
 
 def get_STOP_DISTANCE(personality=log.LongitudinalPersonality.standard):
   if personality==log.LongitudinalPersonality.relaxed:
-    return 6.5
+    return 4.5
   elif personality==log.LongitudinalPersonality.standard:
-    return 6.0
+    return 4.0
   elif personality==log.LongitudinalPersonality.aggressive:
-    return 6.0
+    return 4.0
   else:
     raise NotImplementedError("Longitudinal personality not supported")
 
@@ -339,7 +339,12 @@ class LongitudinalMpc:
     # do not apply to deceleration
     j_ego_v_ego = 1
     a_change_v_ego = 1
-    j_comf = 10 if (v_ego <= low_thr or v_ego >= high_thr) else 1.0
+    if v_ego <= low_thr:
+      j_comf = 5
+    elif v_ego >= high_thr:
+      j_comf = 20
+    else:
+      j_comf = 1
     if (v_lead0 - v_ego >= 0) and (v_lead1 - v_ego >= 0):
       j_ego_v_ego = np.interp(v_ego, v_ego_bps, [.10, 1.])
       a_change_v_ego = np.interp(v_ego, v_ego_bps, [.10, 1.])
