@@ -403,15 +403,15 @@ class LongitudinalMpc:
     new_mode = 'acc' if v_ego > low_thr else 'blended'
     if new_mode != self.mode:
       self.mode = new_mode
-      self.set_weights(prev_accel_constraint=True, personality=personality)
+      self.set_weights(prev_accel_constraint=True, personality=personality, v_lead0=a_lead0, v_lead1=a_lead1)
     #==================================================================
     self.downhill = np.sin(pitch_rad) < -0.04
 
     if self.downhill:
-      t_follow += 0.5
+      t_follow += 0.2
 
     if Params().get_bool("ToyotaTune") and not (self.CP.flags & ToyotaFlags.SMART_DSU):
-      stop_distance += 0.5
+      stop_distance += 2.0
 
     self.status = radarstate.leadOne.status or radarstate.leadTwo.status
 
