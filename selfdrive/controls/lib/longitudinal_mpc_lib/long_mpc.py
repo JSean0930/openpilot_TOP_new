@@ -399,7 +399,7 @@ class LongitudinalMpc:
     t_follow = get_T_FOLLOW(personality) if not dynamic_follow else get_dynamic_follow(v_ego, personality)
     stop_distance = get_STOP_DISTANCE(personality)
     #==================================================================
-    new_mode = 'acc' if v_ego > mid_thr else 'blended'
+    new_mode = 'acc' if v_ego > low_thr else 'blended'
     if new_mode != self.mode:
       self.mode = new_mode
       self.set_weights(prev_accel_constraint=True, personality=personality)
