@@ -403,7 +403,7 @@ class LongitudinalMpc:
     new_mode = 'acc' if v_ego > low_thr else 'blended'
     if new_mode != self.mode:
       self.mode = new_mode
-      self.set_weights(prev_accel_constraint=True, personality=personality, v_lead0=a_lead0, v_lead1=a_lead1)
+      self.set_weights(prev_accel_constraint=True, personality=personality, v_lead0=0, v_lead1=0)
     #==================================================================
     self.downhill = np.sin(pitch_rad) < -0.04
 
