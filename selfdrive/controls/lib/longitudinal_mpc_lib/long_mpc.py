@@ -339,7 +339,7 @@ class LongitudinalMpc:
     # do not apply to deceleration
     j_ego_v_ego = 1
     a_change_v_ego = 1
-    j_comf = 15 if v_ego <= low_thr else 1.0
+    j_comf = 15 if v_ego <= low_thr and v_ego >= high_thr else 1.0
     if (v_lead0 - v_ego >= 0) and (v_lead1 - v_ego >= 0):
       j_ego_v_ego = np.interp(v_ego, v_ego_bps, [.10, 1.])
       a_change_v_ego = np.interp(v_ego, v_ego_bps, [.10, 1.])
