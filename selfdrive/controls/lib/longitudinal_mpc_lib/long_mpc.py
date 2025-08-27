@@ -52,15 +52,21 @@ ACADOS_SOLVER_TYPE = 'SQP_RTI'
 # much better convergence of the MPC with low iterations
 N = 12
 MAX_T = 10.0
-T_IDXS_LST = [index_function(idx, max_val=MAX_T, max_idx=N) for idx in range(N+1)]
+T_IDXS = (np.linspace(0, 1, N + 1) ** 2.0) * MAX_T
 
-T_IDXS = np.array(T_IDXS_LST)
 FCW_IDXS = T_IDXS < 5.0
 T_DIFFS = np.diff(T_IDXS, prepend=[0.])
 COMFORT_BRAKE = 1.75
 # STOP_DISTANCE = 6.0
 CRUISE_MIN_ACCEL = -1.2
 CRUISE_MAX_ACCEL = 1.6
+
+#===================================================================
+start_thr = 10.0 / 3.6
+low_thr  = 20.0 / 3.6   # km/hr to m/s
+mid_thr = 50.0 / 3.6   # km/hr to m/s
+high_thr = 80.0 / 3.6
+#===================================================================
 
 def get_jerk_factor(personality=log.LongitudinalPersonality.standard):
   if personality==log.LongitudinalPersonality.relaxed:
@@ -102,11 +108,11 @@ def get_dynamic_follow(v_ego, personality=log.LongitudinalPersonality.standard):
 
 def get_STOP_DISTANCE(personality=log.LongitudinalPersonality.standard):
   if personality==log.LongitudinalPersonality.relaxed:
-    return 4.5
+    return 6.5
   elif personality==log.LongitudinalPersonality.standard:
-    return 4.0
+    return 6.0
   elif personality==log.LongitudinalPersonality.aggressive:
-    return 4.0
+    return 6.0
   else:
     raise NotImplementedError("Longitudinal personality not supported")
 
@@ -120,7 +126,7 @@ def get_stopped_equivalence_factor(v_lead, v_ego):
   speed_to_reach_max_v_diff_offset = speed_to_reach_max_v_diff_offset * CV.KPH_TO_MS
   delta_speed = v_lead - v_ego
   if np.all(delta_speed > 0.5):
-    v_diff_offset = delta_speed * 2
+    v_diff_offset = delta_speed
     v_diff_offset = np.clip(v_diff_offset, 0, v_diff_offset_max)
     v_diff_offset = np.maximum(v_diff_offset * ((speed_to_reach_max_v_diff_offset - v_ego)/speed_to_reach_max_v_diff_offset), 0)
   return (v_lead**2) / (2 * COMFORT_BRAKE) + v_diff_offset
@@ -392,6 +398,12 @@ class LongitudinalMpc:
     v_ego = self.x0[1]
     t_follow = get_T_FOLLOW(personality) if not dynamic_follow else get_dynamic_follow(v_ego, personality)
     stop_distance = get_STOP_DISTANCE(personality)
+    #==================================================================
+    new_mode = 'acc' if v_ego > mid_thr else 'blended'
+    if new_mode != self.mode:
+      self.mode = new_mode
+      self.set_weights(prev_accel_constraint=True, personality=personality)
+    #==================================================================
     self.downhill = np.sin(pitch_rad) < -0.04
 
     if self.downhill:
@@ -448,7 +460,8 @@ class LongitudinalMpc:
       x_and_cruise = np.column_stack([x, cruise_target])
       x = np.min(x_and_cruise, axis=1)
 
-      self.source = 'e2e' if x_and_cruise[1,0] < x_and_cruise[1,1] else 'cruise'
+      #self.source = 'e2e' if x_and_cruise[1,0] < x_and_cruise[1,1] else 'cruise'
+      self.source = 'e2e' if x_and_cruise[1,0] > x_and_cruise[1,1] else 'cruise'
 
     else:
       raise NotImplementedError(f'Planner mode {self.mode} not recognized in planner update')
