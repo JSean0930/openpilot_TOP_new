@@ -455,10 +455,10 @@ class LongitudinalMpc:
     self.params[:,0] = ACCEL_MIN
     self.params[:,1] = ACCEL_MAX
     #================================================================
-    if v_ego > mid_thr:
+    if v_ego > low_thr:
       self.mode = 'acc'
       self.set_weights(prev_accel_constraint=True, personality=personality, v_lead0=a_lead0, v_lead1=a_lead1)
-    elif v_ego <= mid_thr:
+    elif v_ego <= low_thr:
       self.mode = 'blended'
       self.set_weights(prev_accel_constraint=True, personality=personality, v_lead0=a_lead0, v_lead1=a_lead1)
     #================================================================
@@ -493,7 +493,7 @@ class LongitudinalMpc:
       x_and_cruise = np.column_stack([x, cruise_target])
       #x = np.min(x_and_cruise, axis=1)
       #================================================================
-      w = np.clip((v_ego - 3.0) / mid_thr, 0.0, 1.0)
+      w = np.clip((v_ego - 3.0) / low_thr, 0.0, 1.0)
       #w = np.clip(v_ego / mid_thr, 0.0, 1.0)
       x_mixed = (1 - w) * np.min(x_and_cruise, axis=1) + w * np.max(x_and_cruise, axis=1)
       x = x_mixed
