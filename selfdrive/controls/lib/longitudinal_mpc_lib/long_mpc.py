@@ -49,18 +49,31 @@ ACADOS_SOLVER_TYPE = 'SQP_RTI'
 
 # Fewer timestamps don't hurt performance and lead to
 # much better convergence of the MPC with low iterations
-N = 12
-MAX_T = 10.0
-T_IDXS_LST = [index_function(idx, max_val=MAX_T, max_idx=N) for idx in range(N+1)]
+N = 16#12
+MAX_T = 15.0#10.0
+T_IDXS = (np.linspace(0, 1, N + 1) ** 2.0) * MAX_T
+#T_IDXS_LST = [index_function(idx, max_val=MAX_T, max_idx=N) for idx in range(N+1)]
 
-T_IDXS = np.array(T_IDXS_LST)
+#T_IDXS = np.array(T_IDXS_LST)
 FCW_IDXS = T_IDXS < 5.0
 T_DIFFS = np.diff(T_IDXS, prepend=[0.])
 COMFORT_BRAKE = 2.5
 # STOP_DISTANCE = 6.0
 CRUISE_MIN_ACCEL = -1.2
 CRUISE_MAX_ACCEL = 1.6
-
+#===================================================================
+low_thr  = 20.0 / 3.6   # km/hr to m/s
+mid_thr = 50.0 / 3.6   # km/hr to m/s
+high_thr = 70.0 / 3.6
+#===================================================================
+def get_danger_zone_cost(v_ego):
+  if v_ego <= low_thr:
+    return 100.0
+  elif v_ego <= mid_thr:
+    return 200.0
+  else:
+    return 300.0
+#===================================================================
 def get_jerk_factor(personality=log.LongitudinalPersonality.standard):
   if personality==log.LongitudinalPersonality.relaxed:
     return 1.0
@@ -101,11 +114,11 @@ def get_dynamic_follow(v_ego, personality=log.LongitudinalPersonality.standard):
 
 def get_STOP_DISTANCE(personality=log.LongitudinalPersonality.standard):
   if personality==log.LongitudinalPersonality.relaxed:
-    return 4.5
+    return 5.0
   elif personality==log.LongitudinalPersonality.standard:
-    return 4.0
+    return 5.0
   elif personality==log.LongitudinalPersonality.aggressive:
-    return 4.0
+    return 5.0
   else:
     raise NotImplementedError("Longitudinal personality not supported")
 
@@ -118,7 +131,7 @@ def get_stopped_equivalence_factor(v_lead, v_ego):
   speed_to_reach_max_v_diff_offset = 26 # in kp/h
   speed_to_reach_max_v_diff_offset = speed_to_reach_max_v_diff_offset * CV.KPH_TO_MS
   delta_speed = v_lead - v_ego
-  if np.all(delta_speed > 0):
+  if np.all(delta_speed > 0.5):
     v_diff_offset = delta_speed * 2
     v_diff_offset = np.clip(v_diff_offset, 0, v_diff_offset_max)
     v_diff_offset = np.maximum(v_diff_offset * ((speed_to_reach_max_v_diff_offset - v_ego)/speed_to_reach_max_v_diff_offset), 0)
@@ -331,17 +344,23 @@ class LongitudinalMpc:
     # do not apply to deceleration
     j_ego_v_ego = 1
     a_change_v_ego = 1
+    #========================
+    j_comf = np.interp(v_ego, [0, mid_thr, high_thr], [1.0, 1.5, 2.0])
+    danger_cost = get_danger_zone_cost(v_ego)
+    #========================
     if (v_lead0 - v_ego >= 0) and (v_lead1 - v_ego >= 0):
       j_ego_v_ego = np.interp(v_ego, v_ego_bps, [.10, 1.])
       a_change_v_ego = np.interp(v_ego, v_ego_bps, [.10, 1.])
     if self.mode == 'acc':
+      if v_ego >= high_thr:
+        j_comf *= 5.0
       a_change_cost = A_CHANGE_COST if prev_accel_constraint else 0
       cost_weights = [X_EGO_OBSTACLE_COST, X_EGO_COST, V_EGO_COST, A_EGO_COST, jerk_factor * a_change_cost * a_change_v_ego, jerk_factor * J_EGO_COST * j_ego_v_ego]
-      constraint_cost_weights = [LIMIT_COST, LIMIT_COST, LIMIT_COST, DANGER_ZONE_COST]
+      constraint_cost_weights = [LIMIT_COST, LIMIT_COST, LIMIT_COST, danger_cost]
     elif self.mode == 'blended':
       a_change_cost = 40.0 if prev_accel_constraint else 0
       cost_weights = [0., 0.1, 0.2, 5.0, a_change_cost * a_change_v_ego, 1.0]
-      constraint_cost_weights = [LIMIT_COST, LIMIT_COST, LIMIT_COST, DANGER_ZONE_COST]
+      constraint_cost_weights = [LIMIT_COST, LIMIT_COST, LIMIT_COST, danger_cost]
     else:
       raise NotImplementedError(f'Planner mode {self.mode} not recognized in planner cost set')
     self.set_cost_weights(cost_weights, constraint_cost_weights)
