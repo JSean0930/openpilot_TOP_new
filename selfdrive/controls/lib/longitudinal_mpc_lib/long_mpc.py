@@ -110,7 +110,35 @@ def get_dynamic_follow(v_ego, personality=log.LongitudinalPersonality.standard):
   else:
     raise NotImplementedError("Dynamic Follow personality not supported")
   return np.interp(v_ego, x_vel, y_dist)
+#==================
+def get_dynamic_follow(v_ego, personality=log.LongitudinalPersonality.standard):
+  """
+  Linear + humane tweak:
+  - 主要是速度線性映射（以 km/h 思考更直觀），確保單調不減、無不連續點
+  - 低速(都會/塞車)給一點「起步緩衝」：0~15 km/h 額外 +0.25→0.0s 的跟車秒數
+  - 不同個性只改「斜率 & 截距」，維持直覺差異
+  """
+  v_kph = float(v_ego * 3.6)
 
+  if personality == log.LongitudinalPersonality.relaxed:
+    base = 1.25 + 0.0060 * v_kph   # 0 km/h→1.25s，100 km/h→~1.85s
+    t_min, t_max = 1.20, 2.10
+  elif personality == log.LongitudinalPersonality.standard:
+    base = 1.10 + 0.0045 * v_kph   # 0 km/h→1.10s，100 km/h→~1.55s
+    t_min, t_max = 1.00, 1.90
+  elif personality == log.LongitudinalPersonality.aggressive:
+    base = 0.95 + 0.0030 * v_kph   # 0 km/h→0.95s，100 km/h→~1.25s
+    t_min, t_max = 0.85, 1.60
+  else:
+    raise NotImplementedError("Dynamic Follow personality not supported")
+
+  # 低速人性化緩衝：停走/起步給更長一點距離，隨速度消退
+  # 0→+0.25s, 5 km/h→+0.20s, 15 km/h→+0.00s
+  low_speed_boost = np.interp(v_kph, [0.0, 5.0, 15.0], [0.25, 0.20, 0.00])
+
+  t_follow = base + low_speed_boost
+  return float(np.clip(t_follow, t_min, t_max))
+#==================
 
 def get_STOP_DISTANCE(personality=log.LongitudinalPersonality.standard):
   if personality==log.LongitudinalPersonality.relaxed:
