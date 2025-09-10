@@ -50,18 +50,31 @@ ACADOS_SOLVER_TYPE = 'SQP_RTI'
 
 # Fewer timestamps don't hurt performance and lead to
 # much better convergence of the MPC with low iterations
-N = 12
-MAX_T = 10.0
-T_IDXS_LST = [index_function(idx, max_val=MAX_T, max_idx=N) for idx in range(N+1)]
+N = 16#12
+MAX_T = 15.0#10.0
+T_IDXS = (np.linspace(0, 1, N + 1) ** 2.0) * MAX_T
+#T_IDXS_LST = [index_function(idx, max_val=MAX_T, max_idx=N) for idx in range(N+1)]
 
-T_IDXS = np.array(T_IDXS_LST)
+#T_IDXS = np.array(T_IDXS_LST)
 FCW_IDXS = T_IDXS < 5.0
 T_DIFFS = np.diff(T_IDXS, prepend=[0.])
 COMFORT_BRAKE = 1.85
 # STOP_DISTANCE = 6.0
 CRUISE_MIN_ACCEL = -1.2
 CRUISE_MAX_ACCEL = 1.6
-
+#===================================================================
+low_thr  = 20.0 / 3.6   # km/hr to m/s
+mid_thr = 50.0 / 3.6   # km/hr to m/s
+high_thr = 70.0 / 3.6
+#===================================================================
+def get_danger_zone_cost(v_ego):
+  if v_ego <= low_thr:
+    return 100.0
+  elif v_ego <= mid_thr:
+    return 200.0
+  else:
+    return 300.0
+#===================================================================
 def get_jerk_factor(personality=log.LongitudinalPersonality.standard):
   if personality==log.LongitudinalPersonality.relaxed:
     return 1.0
@@ -84,29 +97,57 @@ def get_T_FOLLOW(personality=log.LongitudinalPersonality.standard):
     raise NotImplementedError("Longitudinal personality not supported")
 
 
-def get_dynamic_follow(v_ego, personality=log.LongitudinalPersonality.standard):
+#def get_dynamic_follow(v_ego, personality=log.LongitudinalPersonality.standard):
   # The Dynamic follow function is adjusted by Marc(cgw1968-5779)
-  if personality==log.LongitudinalPersonality.relaxed:
-    x_vel =  [0.,  6,   10., 10.01, 15., 27.7]
-    y_dist = [1.2, 1.4, 1.4,  1.5, 1.65,  1.8]
-  elif personality==log.LongitudinalPersonality.standard:
-    x_vel =  [0.,  6,   10., 10.01, 15., 27.7]
-    y_dist = [1.1, 1.3, 1.35, 1.4,  1.4, 1.45]
-  elif personality==log.LongitudinalPersonality.aggressive:
-    x_vel =  [0.,  6,   10., 10.01, 15., 27.7]
-    y_dist = [1.0, 1.2, 1.0,   0.9, 0.95, 1.0]
+  #if personality==log.LongitudinalPersonality.relaxed:
+    #x_vel =  [0.,  6,   10., 10.01, 15., 27.7]
+    #y_dist = [1.2, 1.4, 1.4,  1.5, 1.65,  1.8]
+  #elif personality==log.LongitudinalPersonality.standard:
+    #x_vel =  [0.,  6,   10., 10.01, 15., 27.7]
+    #y_dist = [1.1, 1.3, 1.35, 1.4,  1.4, 1.45]
+  #elif personality==log.LongitudinalPersonality.aggressive:
+    #x_vel =  [0.,  6,   10., 10.01, 15., 27.7]
+    #y_dist = [1.0, 1.2, 1.0,   0.9, 0.95, 1.0]
+  #else:
+    #raise NotImplementedError("Dynamic Follow personality not supported")
+  #return np.interp(v_ego, x_vel, y_dist)
+#==================
+def get_dynamic_follow(v_ego, personality=log.LongitudinalPersonality.standard):
+  """
+  Linear + humane tweak:
+  - 主要是速度線性映射（以 km/h 思考更直觀），確保單調不減、無不連續點
+  - 低速(都會/塞車)給一點「起步緩衝」：0~15 km/h 額外 +0.25→0.0s 的跟車秒數
+  - 不同個性只改「斜率 & 截距」，維持直覺差異
+  """
+  v_kph = float(v_ego * 3.6)
+
+  if personality == log.LongitudinalPersonality.relaxed:
+    base = 1.25 + 0.0060 * v_kph   # 0 km/h→1.25s，100 km/h→~1.85s
+    t_min, t_max = 1.20, 2.10
+  elif personality == log.LongitudinalPersonality.standard:
+    base = 1.10 + 0.0045 * v_kph   # 0 km/h→1.10s，100 km/h→~1.55s
+    t_min, t_max = 1.00, 1.90
+  elif personality == log.LongitudinalPersonality.aggressive:
+    base = 0.95 + 0.0030 * v_kph   # 0 km/h→0.95s，100 km/h→~1.25s
+    t_min, t_max = 0.85, 1.60
   else:
     raise NotImplementedError("Dynamic Follow personality not supported")
-  return np.interp(v_ego, x_vel, y_dist)
 
+  # 低速人性化緩衝：停走/起步給更長一點距離，隨速度消退
+  # 0→+0.25s, 5 km/h→+0.20s, 15 km/h→+0.00s
+  low_speed_boost = np.interp(v_kph, [0.0, 5.0, 15.0], [0.25, 0.20, 0.00])
+
+  t_follow = base + low_speed_boost
+  return float(np.clip(t_follow, t_min, t_max))
+#==================
 
 def get_STOP_DISTANCE(personality=log.LongitudinalPersonality.standard):
   if personality==log.LongitudinalPersonality.relaxed:
-    return 4.5
+    return 5.0
   elif personality==log.LongitudinalPersonality.standard:
-    return 4.0
+    return 5.0
   elif personality==log.LongitudinalPersonality.aggressive:
-    return 4.0
+    return 5.0
   else:
     raise NotImplementedError("Longitudinal personality not supported")
 
@@ -333,17 +374,23 @@ class LongitudinalMpc:
     # do not apply to deceleration
     j_ego_v_ego = 1
     a_change_v_ego = 1
+    #========================
+    j_comf = np.interp(v_ego, [0, mid_thr, high_thr], [1.0, 1.5, 2.0])
+    danger_cost = get_danger_zone_cost(v_ego)
+    #========================
     if (v_lead0 - v_ego >= 0) and (v_lead1 - v_ego >= 0):
       j_ego_v_ego = np.interp(v_ego, v_ego_bps, [.10, 1.])
       a_change_v_ego = np.interp(v_ego, v_ego_bps, [.10, 1.])
     if self.mode == 'acc':
+      if v_ego >= high_thr:
+        j_comf *= 5.0
       a_change_cost = A_CHANGE_COST if prev_accel_constraint else 0
-      cost_weights = [X_EGO_OBSTACLE_COST, X_EGO_COST, V_EGO_COST, A_EGO_COST, jerk_factor * a_change_cost * a_change_v_ego, jerk_factor * J_EGO_COST * j_ego_v_ego]
-      constraint_cost_weights = [LIMIT_COST, LIMIT_COST, LIMIT_COST, DANGER_ZONE_COST]
+      cost_weights = [X_EGO_OBSTACLE_COST, X_EGO_COST, V_EGO_COST, A_EGO_COST, jerk_factor * a_change_cost * a_change_v_ego, jerk_factor * J_EGO_COST * j_ego_v_ego * j_comf]
+      constraint_cost_weights = [LIMIT_COST, LIMIT_COST, LIMIT_COST, danger_cost]
     elif self.mode == 'blended':
       a_change_cost = 40.0 if prev_accel_constraint else 0
-      cost_weights = [0., 0.1, 0.2, 5.0, a_change_cost, 1.0]
-      constraint_cost_weights = [LIMIT_COST, LIMIT_COST, LIMIT_COST, DANGER_ZONE_COST]
+      cost_weights = [0., 0.1, 0.2, 5.0, a_change_cost, 1.0 * jerk_factor * j_comf]
+      constraint_cost_weights = [LIMIT_COST, LIMIT_COST, LIMIT_COST, danger_cost]
     else:
       raise NotImplementedError(f'Planner mode {self.mode} not recognized in planner cost set')
     self.set_cost_weights(cost_weights, constraint_cost_weights)
@@ -395,10 +442,10 @@ class LongitudinalMpc:
     self.downhill = np.sin(pitch_rad) < -0.04
 
     if self.downhill:
-      t_follow += 0.3
+      t_follow += 0.2
 
     if Params().get_bool("ToyotaTune") and not (self.CP.flags & ToyotaFlags.SMART_DSU):
-      stop_distance += 1
+      stop_distance += 4.0
 
     self.status = radarstate.leadOne.status or radarstate.leadTwo.status
 
@@ -415,6 +462,14 @@ class LongitudinalMpc:
 
     self.params[:,0] = ACCEL_MIN
     self.params[:,1] = ACCEL_MAX
+    #================================================================
+    if v_ego > low_thr:
+      self.mode = 'acc'
+      self.set_weights(prev_accel_constraint=True, personality=personality, v_lead0=a_lead0, v_lead1=a_lead1)
+    elif v_ego <= low_thr:
+      self.mode = 'blended'
+      self.set_weights(prev_accel_constraint=True, personality=personality, v_lead0=a_lead0, v_lead1=a_lead1)
+    #================================================================
 
     # Update in ACC mode or ACC/e2e blend
     if self.mode == 'acc':
@@ -446,9 +501,15 @@ class LongitudinalMpc:
       x = np.cumsum(np.insert(xforward, 0, x[0]))
 
       x_and_cruise = np.column_stack([x, cruise_target])
-      x = np.min(x_and_cruise, axis=1)
+      #x = np.min(x_and_cruise, axis=1)
+      #================================================================
+      w = np.clip((v_ego - 3.0) / low_thr, 0.0, 1.0)
+      #w = np.clip(v_ego / mid_thr, 0.0, 1.0)
+      x_mixed = (1 - w) * np.min(x_and_cruise, axis=1) + w * np.max(x_and_cruise, axis=1)
+      x = x_mixed
+      #================================================================
 
-      self.source = 'e2e' if x_and_cruise[1,0] < x_and_cruise[1,1] else 'cruise'
+      self.source = 'e2e' if x_and_cruise[1,0] > x_and_cruise[1,1] else 'cruise'
 
     else:
       raise NotImplementedError(f'Planner mode {self.mode} not recognized in planner update')
