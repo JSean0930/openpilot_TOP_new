@@ -437,6 +437,8 @@ class LongitudinalMpc:
   def update(self, radarstate, v_cruise, x, v, a, j, personality=log.LongitudinalPersonality.standard, dynamic_follow=False, pitch_rad=0.0):
     # t_follow = get_T_FOLLOW(personality)
     v_ego = self.x0[1]
+    a_lead0 = np.nan_to_num(radarstate.leadOne.aLeadK, nan=0.0) if radarstate.leadOne.status else 0.0
+    a_lead1 = np.nan_to_num(radarstate.leadTwo.aLeadK, nan=0.0) if radarstate.leadTwo.status else 0.0
     t_follow = get_T_FOLLOW(personality) if not dynamic_follow else get_dynamic_follow(v_ego, personality)
     stop_distance = get_STOP_DISTANCE(personality)
     self.downhill = np.sin(pitch_rad) < -0.04
