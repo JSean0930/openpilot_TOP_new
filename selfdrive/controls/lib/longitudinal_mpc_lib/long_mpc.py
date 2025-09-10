@@ -50,8 +50,8 @@ ACADOS_SOLVER_TYPE = 'SQP_RTI'
 
 # Fewer timestamps don't hurt performance and lead to
 # much better convergence of the MPC with low iterations
-N = 16#12
-MAX_T = 15.0#10.0
+N = 12
+MAX_T = 10.0
 T_IDXS = (np.linspace(0, 1, N + 1) ** 2.0) * MAX_T
 #T_IDXS_LST = [index_function(idx, max_val=MAX_T, max_idx=N) for idx in range(N+1)]
 
