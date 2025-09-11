@@ -554,6 +554,22 @@ class LongitudinalMpc:
       d_safe = get_safe_obstacle_distance(self.x_sol[:,1], t_follow, stop_distance)
       margin0 = (lead_0_obstacle - d_safe) - self.x_sol[:,0]
       margin1 = (lead_1_obstacle - d_safe) - self.x_sol[:,0]
+      # De-noise thresholds
+      EPS = 0.5 # meters; buffer to avoid boundary chattering
+      K = 3 # require at least K violating nodes to trigger takeover
+      # Hysteresis: once takeover occurs, hold for DWELL seconds
+      now = time.monotonic()
+      DWELL = 1.0
+      if now < self.lead_takeover_until:
+        # still within dwell window; keep current source
+        pass
+      else:
+        if np.count_nonzero(margin0 < -EPS) >= K:
+          self.source = 'lead0'
+          self.lead_takeover_until = now + DWELL
+        elif (np.count_nonzero(margin1 < -EPS) >= K) and (lead_1_obstacle[0] < lead_0_obstacle[0]):
+          self.source = 'lead1'
+          self.lead_takeover_until = now + DWELL
     #================================================================
   def run(self):
     # t0 = time.monotonic()
