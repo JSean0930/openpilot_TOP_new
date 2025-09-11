@@ -349,7 +349,10 @@ class LongitudinalMpc:
     self.time_integrator = 0.0
     self.x0 = np.zeros(X_DIM)
     self.set_weights()
-
+    #================================================================
+    # Hysteresis state for lead-based takeover to avoid chattering
+    self.lead_takeover_until = 0.0
+    #================================================================
   def set_cost_weights(self, cost_weights, constraint_cost_weights):
     W = np.asfortranarray(np.diag(cost_weights))
     for i in range(N):
@@ -540,13 +543,18 @@ class LongitudinalMpc:
 
     # Check if it got within lead comfort range
     # TODO This should be done cleaner
+    #if self.mode == 'blended':
+      #if any((lead_0_obstacle - get_safe_obstacle_distance(self.x_sol[:,1], t_follow, stop_distance))- self.x_sol[:,0] < 0.0):
+        #self.source = 'lead0'
+      #if any((lead_1_obstacle - get_safe_obstacle_distance(self.x_sol[:,1], t_follow, stop_distance))- self.x_sol[:,0] < 0.0) and \
+         #(lead_1_obstacle[0] - lead_0_obstacle[0]):
+        #self.source = 'lead1'
+    #================================================================
     if self.mode == 'blended':
-      if any((lead_0_obstacle - get_safe_obstacle_distance(self.x_sol[:,1], t_follow, stop_distance))- self.x_sol[:,0] < 0.0):
-        self.source = 'lead0'
-      if any((lead_1_obstacle - get_safe_obstacle_distance(self.x_sol[:,1], t_follow, stop_distance))- self.x_sol[:,0] < 0.0) and \
-         (lead_1_obstacle[0] - lead_0_obstacle[0]):
-        self.source = 'lead1'
-
+      d_safe = get_safe_obstacle_distance(self.x_sol[:,1], t_follow, stop_distance)
+      margin0 = (lead_0_obstacle - d_safe) - self.x_sol[:,0]
+      margin1 = (lead_1_obstacle - d_safe) - self.x_sol[:,0]
+    #================================================================
   def run(self):
     # t0 = time.monotonic()
     # reset = 0
