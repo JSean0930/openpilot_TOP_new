@@ -437,8 +437,6 @@ class LongitudinalMpc:
   def update(self, radarstate, v_cruise, x, v, a, j, personality=log.LongitudinalPersonality.standard, dynamic_follow=False, pitch_rad=0.0):
     # t_follow = get_T_FOLLOW(personality)
     v_ego = self.x0[1]
-    a_lead0 = np.nan_to_num(radarstate.leadOne.aLeadK, nan=0.0) if radarstate.leadOne.status else 0.0
-    a_lead1 = np.nan_to_num(radarstate.leadTwo.aLeadK, nan=0.0) if radarstate.leadTwo.status else 0.0
     t_follow = get_T_FOLLOW(personality) if not dynamic_follow else get_dynamic_follow(v_ego, personality)
     stop_distance = get_STOP_DISTANCE(personality)
     self.downhill = np.sin(pitch_rad) < -0.04
@@ -465,12 +463,16 @@ class LongitudinalMpc:
     self.params[:,0] = ACCEL_MIN
     self.params[:,1] = ACCEL_MAX
     #================================================================
+    # 取兩個前車當前時刻的速度（m/s）
+    v_lead0 = float(lead_xv_0[0, 1])
+    v_lead1 = float(lead_xv_1[0, 1])
+
     if v_ego > low_thr:
       self.mode = 'acc'
-      self.set_weights(prev_accel_constraint=True, personality=personality, v_lead0=a_lead0, v_lead1=a_lead1)
+      self.set_weights(prev_accel_constraint=True, personality=personality, v_lead0=v_lead0, v_lead1=v_lead1)
     elif v_ego <= low_thr:
       self.mode = 'blended'
-      self.set_weights(prev_accel_constraint=True, personality=personality, v_lead0=a_lead0, v_lead1=a_lead1)
+      self.set_weights(prev_accel_constraint=True, personality=personality, v_lead0=v_lead0, v_lead1=v_lead1)
     #================================================================
 
     # Update in ACC mode or ACC/e2e blend
