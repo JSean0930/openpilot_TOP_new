@@ -63,7 +63,7 @@ COMFORT_BRAKE = 1.85
 CRUISE_MIN_ACCEL = -1.2
 CRUISE_MAX_ACCEL = 1.6
 #===================================================================
-low_thr  = 20.0 / 3.6   # km/hr to m/s
+low_thr  = 30.0 / 3.6   # km/hr to m/s
 mid_thr = 50.0 / 3.6   # km/hr to m/s
 high_thr = 70.0 / 3.6
 #===================================================================
@@ -471,12 +471,12 @@ class LongitudinalMpc:
     v_lead0 = float(lead_xv_0[0, 1])
     v_lead1 = float(lead_xv_1[0, 1])
 
-    #if v_ego > low_thr:
-      #self.mode = 'acc'
-      #self.set_weights(prev_accel_constraint=True, personality=personality, v_lead0=v_lead0, v_lead1=v_lead1)
-    #elif v_ego <= low_thr:
-      #self.mode = 'blended'
-      #self.set_weights(prev_accel_constraint=True, personality=personality, v_lead0=v_lead0, v_lead1=v_lead1)
+    if v_ego > low_thr:
+      self.mode = 'acc'
+      self.set_weights(prev_accel_constraint=True, personality=personality, v_lead0=v_lead0, v_lead1=v_lead1)
+    elif v_ego <= low_thr:
+      self.mode = 'blended'
+      self.set_weights(prev_accel_constraint=True, personality=personality, v_lead0=v_lead0, v_lead1=v_lead1)
     #================================================================
 
     # Update in ACC mode or ACC/e2e blend
