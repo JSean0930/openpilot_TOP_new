@@ -107,7 +107,8 @@ def get_dynamic_follow(v_ego, personality=log.LongitudinalPersonality.standard):
     y_dist = [1.1, 1.3, 1.35, 1.4,  1.4, 1.45]
   elif personality==log.LongitudinalPersonality.aggressive:
     x_vel =  [0.,  6,   10., 10.01, 15., 27.7]
-    y_dist = [1.0, 1.2, 1.0,   0.9, 0.95, 1.0]
+    #y_dist = [1.0, 1.2, 1.0,   0.9, 0.95, 1.0]
+    y_dist = [0.8, 1.0, 0.8,   0.9, 0.95, 1.0]
   else:
     raise NotImplementedError("Dynamic Follow personality not supported")
   return np.interp(v_ego, x_vel, y_dist)
@@ -161,7 +162,7 @@ def get_stopped_equivalence_factor(v_lead, v_ego):
   speed_to_reach_max_v_diff_offset = speed_to_reach_max_v_diff_offset * CV.KPH_TO_MS
   delta_speed = v_lead - v_ego
   if np.all(delta_speed > 0):
-    v_diff_offset = delta_speed
+    v_diff_offset = delta_speed * 4
     v_diff_offset = np.clip(v_diff_offset, 0, v_diff_offset_max)
     v_diff_offset = np.maximum(v_diff_offset * ((speed_to_reach_max_v_diff_offset - v_ego)/speed_to_reach_max_v_diff_offset), 0)
   return (v_lead**2) / (2 * COMFORT_BRAKE) + v_diff_offset
@@ -392,7 +393,7 @@ class LongitudinalMpc:
       constraint_cost_weights = [LIMIT_COST, LIMIT_COST, LIMIT_COST, danger_cost]
     elif self.mode == 'blended':
       a_change_cost = 40.0 if prev_accel_constraint else 0
-      cost_weights = [0., 0.1, 0.2, 5.0, a_change_cost, 1.0 * jerk_factor * j_comf]
+      cost_weights = [0., 0.1, 0.2, 5.0, a_change_cost, j_ego_v_ego * jerk_factor * j_comf]
       constraint_cost_weights = [LIMIT_COST, LIMIT_COST, LIMIT_COST, danger_cost]
     else:
       raise NotImplementedError(f'Planner mode {self.mode} not recognized in planner cost set')
@@ -445,7 +446,7 @@ class LongitudinalMpc:
     self.downhill = np.sin(pitch_rad) < -0.04
 
     if self.downhill:
-      t_follow += 0.2
+      t_follow += 0.1
 
     if Params().get_bool("ToyotaTune") and not (self.CP.flags & ToyotaFlags.SMART_DSU):
       stop_distance += 1.0
@@ -499,7 +500,7 @@ class LongitudinalMpc:
       x[:], v[:], a[:], j[:] = 0.0, 0.0, 0.0, 0.0
 
     elif self.mode == 'blended':
-      self.params[:,5] = LEAD_DANGER_FACTOR
+      self.params[:,5] = 0.6
 
       x_obstacles = np.column_stack([lead_0_obstacle,
                                      lead_1_obstacle])
