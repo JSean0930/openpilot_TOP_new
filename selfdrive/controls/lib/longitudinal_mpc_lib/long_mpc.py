@@ -514,7 +514,8 @@ class LongitudinalMpc:
       #w = np.clip((v_ego - 3.0) / low_thr, 0.0, 1.0)
       #w = np.clip(v_ego / mid_thr, 0.0, 1.0)
       # ★ 調整權重：低速接近 0，高速趨近 0.98（幾乎等於 ACC，但仍保留 e2e 決策）
-      w_raw = (v_ego - low_thr) / max(1e-6, (high_thr - low_thr))
+      #w_raw = (v_ego - low_thr) / max(1e-6, (high_thr - low_thr))
+      w_raw = v_ego / max(1e-6, (high_thr - low_thr))
       w = np.clip(w_raw, 0.0, 0.98)
       
       x_mixed = (1 - w) * np.min(x_and_cruise, axis=1) + w * np.max(x_and_cruise, axis=1)
