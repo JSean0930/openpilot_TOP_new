@@ -449,7 +449,7 @@ class LongitudinalMpc:
       t_follow += 0.1
 
     if Params().get_bool("ToyotaTune") and not (self.CP.flags & ToyotaFlags.SMART_DSU):
-      stop_distance += 1.0
+      stop_distance += 2.0
 
     self.status = radarstate.leadOne.status or radarstate.leadTwo.status
 
