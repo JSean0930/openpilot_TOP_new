@@ -71,7 +71,7 @@ def get_danger_zone_cost(v_ego):
   if v_ego <= low_thr:
     return 100.0
   elif v_ego <= mid_thr:
-    return 150.0
+    return 100.0
   else:
     return 200.0
 #===================================================================
@@ -449,7 +449,7 @@ class LongitudinalMpc:
       t_follow += 0.1
 
     if Params().get_bool("ToyotaTune") and not (self.CP.flags & ToyotaFlags.SMART_DSU):
-      stop_distance += 2.0
+      stop_distance += 3.0
 
     self.status = radarstate.leadOne.status or radarstate.leadTwo.status
 
@@ -517,7 +517,7 @@ class LongitudinalMpc:
       #w_raw = (v_ego - low_thr) / max(1e-6, (high_thr - low_thr))
       w_raw = v_ego / max(1e-6, (high_thr - low_thr))
       #w = np.clip(w_raw, 0.0, 0.98)
-      w = np.clip(w_raw + 0.3, 0.0, 1.0)
+      w = np.clip(w_raw + 0.2, 0.0, 1.0)
       x_mixed = (1 - w) * np.min(x_and_cruise, axis=1) + w * np.max(x_and_cruise, axis=1)
       x = x_mixed
       #================================================================
