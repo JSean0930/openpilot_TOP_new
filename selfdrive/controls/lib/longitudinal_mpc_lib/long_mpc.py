@@ -471,12 +471,12 @@ class LongitudinalMpc:
     v_lead0 = float(lead_xv_0[0, 1])
     v_lead1 = float(lead_xv_1[0, 1])
 
-    #if v_ego > low_thr:
-      #self.mode = 'acc'
-      #self.set_weights(prev_accel_constraint=True, personality=personality, v_lead0=v_lead0, v_lead1=v_lead1)
-    #elif v_ego <= low_thr:
-      #self.mode = 'blended'
-      #self.set_weights(prev_accel_constraint=True, personality=personality, v_lead0=v_lead0, v_lead1=v_lead1)
+    if v_ego > low_thr:
+      self.mode = 'acc'
+      self.set_weights(prev_accel_constraint=True, personality=personality, v_lead0=v_lead0, v_lead1=v_lead1)
+    elif v_ego <= low_thr:
+      self.mode = 'blended'
+      self.set_weights(prev_accel_constraint=True, personality=personality, v_lead0=v_lead0, v_lead1=v_lead1)
     #================================================================
 
     # Update in ACC mode or ACC/e2e blend
@@ -516,8 +516,8 @@ class LongitudinalMpc:
       # ★ 調整權重：低速接近 0，高速趨近 0.98（幾乎等於 ACC，但仍保留 e2e 決策）
       #w_raw = (v_ego - low_thr) / max(1e-6, (high_thr - low_thr))
       w_raw = v_ego / max(1e-6, (high_thr - low_thr))
-      #w = np.clip(w_raw, 0.0, 0.98)
-      w = np.clip(w_raw + 0.2, 0.0, 1.0)
+      w = np.clip(w_raw, 0.0, 0.98)
+      #w = np.clip(w_raw + 0.2, 0.0, 1.0)
       x_mixed = (1 - w) * np.min(x_and_cruise, axis=1) + w * np.max(x_and_cruise, axis=1)
       x = x_mixed
       #================================================================
