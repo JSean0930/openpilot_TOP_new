@@ -520,7 +520,7 @@ class LongitudinalMpc:
       v_start_thr = 15 / 3.6
       if v_ego <= v_start_thr:
         w_raw = v_ego / v_start_thr
-      elif
+      elif:
         w_raw = v_ego / mid_thr
       w = np.clip(w_raw, 0.0, 0.98)
       #w = np.clip(w_raw + 0.2, 0.0, 1.0)
