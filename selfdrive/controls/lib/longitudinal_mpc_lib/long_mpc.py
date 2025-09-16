@@ -393,6 +393,8 @@ class LongitudinalMpc:
       cost_weights = [X_EGO_OBSTACLE_COST, X_EGO_COST, V_EGO_COST, A_EGO_COST, jerk_factor * a_change_cost * a_change_v_ego, jerk_factor * J_EGO_COST * j_ego_v_ego * j_comf]
       constraint_cost_weights = [LIMIT_COST, LIMIT_COST, LIMIT_COST, danger_cost]
     elif self.mode == 'blended':
+      if v_ego <= low_thr:
+        j_comf *= 3.0
       a_change_cost = 40.0 if prev_accel_constraint else 0
       cost_weights = [0., 0.1, 0.2, 5.0, a_change_cost, j_ego_v_ego * jerk_factor * j_comf]
       constraint_cost_weights = [LIMIT_COST, LIMIT_COST, LIMIT_COST, danger_cost]
@@ -517,9 +519,9 @@ class LongitudinalMpc:
       # ★ 調整權重：低速接近 0，高速趨近 0.98（幾乎等於 ACC，但仍保留 e2e 決策）
       #w_raw = (v_ego - low_thr) / max(1e-6, (high_thr - low_thr))
       #w_raw = v_ego / max(1e-6, (high_thr - low_thr))
-      v_start_thr = 55 / 3.6
+      v_start_thr = 50 / 3.6
       w_raw = v_ego / v_start_thr
-      w = np.clip(w_raw, 0.2, 0.98)
+      w = np.clip(w_raw, 0.1, 0.98)
       #w = np.clip(w_raw + 0.2, 0.0, 1.0)
       x_mixed = (1 - w) * np.min(x_and_cruise, axis=1) + w * np.max(x_and_cruise, axis=1)
       x = x_mixed
