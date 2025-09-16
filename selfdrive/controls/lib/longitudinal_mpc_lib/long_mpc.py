@@ -70,7 +70,7 @@ high_thr = 70.0 / 3.6
 #===================================================================
 def get_danger_zone_cost(v_ego):
   if v_ego <= low_thr:
-    return 200.0
+    return 300.0
   elif v_ego <= mid_thr:
     return 150.0
   else:
@@ -145,11 +145,11 @@ def get_dynamic_follow(v_ego, personality=log.LongitudinalPersonality.standard):
 
 def get_STOP_DISTANCE(personality=log.LongitudinalPersonality.standard):
   if personality==log.LongitudinalPersonality.relaxed:
-    return 5.0
+    return 6.0
   elif personality==log.LongitudinalPersonality.standard:
-    return 5.0
+    return 6.0
   elif personality==log.LongitudinalPersonality.aggressive:
-    return 5.0
+    return 6.0
   else:
     raise NotImplementedError("Longitudinal personality not supported")
 
@@ -158,7 +158,7 @@ def get_stopped_equivalence_factor(v_lead, v_ego):
   # KRKeegan this offset rapidly decreases the following distance when the lead pulls
   # away, resulting in an early demand for acceleration.
   v_diff_offset = 0
-  v_diff_offset_max = 13
+  v_diff_offset_max = 10
   speed_to_reach_max_v_diff_offset = 15 # in kp/h
   speed_to_reach_max_v_diff_offset = speed_to_reach_max_v_diff_offset * CV.KPH_TO_MS
   delta_speed = v_lead - v_ego
@@ -394,7 +394,7 @@ class LongitudinalMpc:
       constraint_cost_weights = [LIMIT_COST, LIMIT_COST, LIMIT_COST, danger_cost]
     elif self.mode == 'blended':
       if v_ego <= low_thr:
-        j_comf *= 3.0
+        j_comf *= 6.0
       a_change_cost = 40.0 if prev_accel_constraint else 0
       cost_weights = [0., 0.1, 0.2, 5.0, a_change_cost, j_ego_v_ego * jerk_factor * j_comf]
       constraint_cost_weights = [LIMIT_COST, LIMIT_COST, LIMIT_COST, danger_cost]
@@ -503,7 +503,7 @@ class LongitudinalMpc:
       x[:], v[:], a[:], j[:] = 0.0, 0.0, 0.0, 0.0
 
     elif self.mode == 'blended':
-      self.params[:,5] = 0.7
+      self.params[:,5] = 0.8
 
       x_obstacles = np.column_stack([lead_0_obstacle,
                                      lead_1_obstacle])
