@@ -82,7 +82,7 @@ def get_jerk_factor(personality=log.LongitudinalPersonality.standard):
   elif personality==log.LongitudinalPersonality.standard:
     return 1.0
   elif personality==log.LongitudinalPersonality.aggressive:
-    return 0.3
+    return 1.0
   else:
     raise NotImplementedError("Longitudinal personality not supported")
 
@@ -394,7 +394,7 @@ class LongitudinalMpc:
       constraint_cost_weights = [LIMIT_COST, LIMIT_COST, LIMIT_COST, danger_cost]
     elif self.mode == 'blended':
       if v_ego <= low_thr:
-        j_comf *= 6.0
+        j_comf *= 8.0
       a_change_cost = 40.0 if prev_accel_constraint else 0
       cost_weights = [0., 0.1, 0.2, 5.0, a_change_cost, j_ego_v_ego * jerk_factor * j_comf]
       constraint_cost_weights = [LIMIT_COST, LIMIT_COST, LIMIT_COST, danger_cost]
@@ -521,7 +521,7 @@ class LongitudinalMpc:
       #w_raw = v_ego / max(1e-6, (high_thr - low_thr))
       v_start_thr = 50 / 3.6
       w_raw = v_ego / v_start_thr
-      w = np.clip(w_raw, 0.1, 0.98)
+      w = np.clip(w_raw, 0.15, 0.98)
       #w = np.clip(w_raw + 0.2, 0.0, 1.0)
       x_mixed = (1 - w) * np.min(x_and_cruise, axis=1) + w * np.max(x_and_cruise, axis=1)
       x = x_mixed
