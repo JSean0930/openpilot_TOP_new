@@ -388,13 +388,13 @@ class LongitudinalMpc:
       a_change_v_ego = np.interp(v_ego, v_ego_bps, [.10, 1.])
     if self.mode == 'acc':
       if v_ego >= high_thr:
-        j_comf *= 5.0
+        j_comf *= 6.0
       a_change_cost = A_CHANGE_COST if prev_accel_constraint else 0
       cost_weights = [X_EGO_OBSTACLE_COST, X_EGO_COST, V_EGO_COST, A_EGO_COST, jerk_factor * a_change_cost * a_change_v_ego, jerk_factor * J_EGO_COST * j_ego_v_ego * j_comf]
       constraint_cost_weights = [LIMIT_COST, LIMIT_COST, LIMIT_COST, danger_cost]
     elif self.mode == 'blended':
       if v_ego <= low_thr:
-        j_comf *= 8.0
+        j_comf *= 10.0
       a_change_cost = 40.0 if prev_accel_constraint else 0
       cost_weights = [0., 0.1, 0.2, 5.0, a_change_cost, j_ego_v_ego * jerk_factor * j_comf]
       constraint_cost_weights = [LIMIT_COST, LIMIT_COST, LIMIT_COST, danger_cost]
@@ -474,10 +474,10 @@ class LongitudinalMpc:
     v_lead0 = float(lead_xv_0[0, 1])
     v_lead1 = float(lead_xv_1[0, 1])
 
-    if v_ego > low_thr:
+    if v_ego > mid_thr:
       self.mode = 'acc'
       self.set_weights(prev_accel_constraint=True, personality=personality, v_lead0=v_lead0, v_lead1=v_lead1)
-    elif v_ego <= low_thr:
+    elif v_ego <= mid_thr:
       self.mode = 'blended'
       self.set_weights(prev_accel_constraint=True, personality=personality, v_lead0=v_lead0, v_lead1=v_lead1)
     #================================================================
@@ -521,7 +521,7 @@ class LongitudinalMpc:
       #w_raw = v_ego / max(1e-6, (high_thr - low_thr))
       v_start_thr = 50 / 3.6
       w_raw = v_ego / v_start_thr
-      w = np.clip(w_raw, 0.15, 0.98)
+      w = np.clip(w_raw, 0.1, 0.98)
       #w = np.clip(w_raw + 0.2, 0.0, 1.0)
       x_mixed = (1 - w) * np.min(x_and_cruise, axis=1) + w * np.max(x_and_cruise, axis=1)
       x = x_mixed
