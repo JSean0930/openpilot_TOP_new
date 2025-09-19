@@ -78,7 +78,7 @@ def get_danger_zone_cost(v_ego):
 #===================================================================
 def get_jerk_factor(personality=log.LongitudinalPersonality.standard):
   if personality==log.LongitudinalPersonality.relaxed:
-    return 1.6
+    return 1.0
   elif personality==log.LongitudinalPersonality.standard:
     return 1.4
   elif personality==log.LongitudinalPersonality.aggressive:
