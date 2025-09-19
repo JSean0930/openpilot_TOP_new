@@ -124,14 +124,14 @@ def get_dynamic_follow(v_ego, personality=log.LongitudinalPersonality.standard):
   v_kph = float(v_ego * 3.6)
 
   if personality == log.LongitudinalPersonality.relaxed:
-    base = 1.25 + 0.0060 * v_kph   # 0 km/h→1.25s，100 km/h→~1.85s
-    t_min, t_max = 1.25, 2.10
+    base = 1.35 + 0.0060 * v_kph   # 0 km/h→1.25s，100 km/h→~1.85s
+    t_min, t_max = 1.35, 2.10
   elif personality == log.LongitudinalPersonality.standard:
-    base = 1.10 + 0.0045 * v_kph   # 0 km/h→1.10s，100 km/h→~1.55s
-    t_min, t_max = 1.10, 1.90
+    base = 1.20 + 0.0045 * v_kph   # 0 km/h→1.10s，100 km/h→~1.55s
+    t_min, t_max = 1.20, 1.90
   elif personality == log.LongitudinalPersonality.aggressive:
-    base = 0.95 + 0.0030 * v_kph   # 0 km/h→0.95s，100 km/h→~1.25s
-    t_min, t_max = 0.95, 1.60
+    base = 1.05 + 0.0030 * v_kph   # 0 km/h→0.95s，100 km/h→~1.25s
+    t_min, t_max = 1.05, 1.60
   else:
     raise NotImplementedError("Dynamic Follow personality not supported")
 
