@@ -58,7 +58,7 @@ T_IDXS = (np.linspace(0, 1, N + 1) ** 2.0) * MAX_T
 #T_IDXS = np.array(T_IDXS_LST)
 FCW_IDXS = T_IDXS < 5.0
 T_DIFFS = np.diff(T_IDXS, prepend=[0.])
-COMFORT_BRAKE = 2.0#1.85
+COMFORT_BRAKE = 1.9#1.85
 # STOP_DISTANCE = 6.0
 CRUISE_MIN_ACCEL = -1.2
 CRUISE_MAX_ACCEL = 1.6
@@ -125,19 +125,19 @@ def get_dynamic_follow(v_ego, personality=log.LongitudinalPersonality.standard):
 
   if personality == log.LongitudinalPersonality.relaxed:
     base = 1.25 + 0.0060 * v_kph   # 0 km/h→1.25s，100 km/h→~1.85s
-    t_min, t_max = 1.20, 2.10
+    t_min, t_max = 1.25, 2.10
   elif personality == log.LongitudinalPersonality.standard:
     base = 1.10 + 0.0045 * v_kph   # 0 km/h→1.10s，100 km/h→~1.55s
-    t_min, t_max = 1.00, 1.90
+    t_min, t_max = 1.10, 1.90
   elif personality == log.LongitudinalPersonality.aggressive:
     base = 0.95 + 0.0030 * v_kph   # 0 km/h→0.95s，100 km/h→~1.25s
-    t_min, t_max = 0.85, 1.60
+    t_min, t_max = 0.95, 1.60
   else:
     raise NotImplementedError("Dynamic Follow personality not supported")
 
   # 低速人性化緩衝：停走/起步給更長一點距離，隨速度消退
   # 0→+0.25s, 5 km/h→+0.20s, 15 km/h→+0.00s
-  low_speed_boost = np.interp(v_kph, [0.0, 5.0, 15.0], [0.25, 0.20, 0.00])
+  low_speed_boost = np.interp(v_kph, [0.0, 5.0], [-0.1, 0.00])
 
   t_follow = base + low_speed_boost
   return float(np.clip(t_follow, t_min, t_max))
@@ -519,7 +519,7 @@ class LongitudinalMpc:
       # ★ 調整權重：低速接近 0，高速趨近 0.98（幾乎等於 ACC，但仍保留 e2e 決策）
       #w_raw = (v_ego - low_thr) / max(1e-6, (high_thr - low_thr))
       #w_raw = v_ego / max(1e-6, (high_thr - low_thr))
-      v_start_thr = 60 / 3.6
+      v_start_thr = 70 / 3.6
       w_raw = v_ego / v_start_thr
       w = np.clip(w_raw, 0.1, 0.6)
       #w = np.clip(w_raw + 0.2, 0.0, 1.0)
