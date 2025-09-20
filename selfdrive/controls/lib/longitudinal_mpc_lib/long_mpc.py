@@ -566,13 +566,13 @@ class LongitudinalMpc:
       margin0 = (lead_0_obstacle - d_safe) - self.x_sol[:,0]
       margin1 = (lead_1_obstacle - d_safe) - self.x_sol[:,0]
       # De-noise thresholds
-      EPS = 0.5 # meters; buffer to avoid boundary chattering
-      K = 3 # require at least K violating nodes to trigger takeover
+      EPS = 0.5 # meters; m，安全緩衝；避免在 0 邊界抖
+      K = 3 # 至少 K 個節點違反才接管
       # Hysteresis: once takeover occurs, hold for DWELL seconds
       now = time.monotonic()
       DWELL = 1.0
       if now < self.lead_takeover_until:
-        # still within dwell window; keep current source
+        # 鎖定期間：保持 lead 來源，不做任何切回判斷
         pass
       else:
         if np.count_nonzero(margin0 < -EPS) >= K:
