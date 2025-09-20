@@ -388,7 +388,7 @@ class LongitudinalMpc:
       a_change_v_ego = np.interp(v_ego, v_ego_bps, [.10, 1.])
     if self.mode == 'acc':
       if v_ego >= high_thr:
-        j_comf *= 6.0
+        j_comf *= 8.0
       a_change_cost = A_CHANGE_COST if prev_accel_constraint else 0
       cost_weights = [X_EGO_OBSTACLE_COST, X_EGO_COST, V_EGO_COST, A_EGO_COST, jerk_factor * a_change_cost * a_change_v_ego, jerk_factor * J_EGO_COST * j_ego_v_ego * j_comf]
       constraint_cost_weights = [LIMIT_COST, LIMIT_COST, LIMIT_COST, danger_cost]
