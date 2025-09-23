@@ -72,7 +72,7 @@ def get_danger_zone_cost(v_ego):
   if v_ego <= low_thr:
     return 300.0
   elif v_ego <= mid_thr:
-    return 200.0
+    return 250.0
   else:
     return 200.0
 #===================================================================
@@ -82,7 +82,7 @@ def get_jerk_factor(personality=log.LongitudinalPersonality.standard):
   elif personality==log.LongitudinalPersonality.standard:
     return 0.8
   elif personality==log.LongitudinalPersonality.aggressive:
-    return 0.6
+    return 0.8
   else:
     raise NotImplementedError("Longitudinal personality not supported")
 
@@ -503,7 +503,7 @@ class LongitudinalMpc:
       x[:], v[:], a[:], j[:] = 0.0, 0.0, 0.0, 0.0
 
     elif self.mode == 'blended':
-      self.params[:,5] = 0.8
+      self.params[:,5] = 0.85
 
       x_obstacles = np.column_stack([lead_0_obstacle,
                                      lead_1_obstacle])
