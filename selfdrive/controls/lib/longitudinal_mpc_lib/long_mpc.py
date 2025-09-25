@@ -159,7 +159,7 @@ def get_stopped_equivalence_factor(v_lead, v_ego):
   # away, resulting in an early demand for acceleration.
   v_diff_offset = 0
   v_diff_offset_max = 8 #10
-  speed_to_reach_max_v_diff_offset = 15 # in kp/h
+  speed_to_reach_max_v_diff_offset = 10 # in kp/h 15
   speed_to_reach_max_v_diff_offset = speed_to_reach_max_v_diff_offset * CV.KPH_TO_MS
   delta_speed = v_lead * 2 - v_ego
   if np.all(delta_speed > 0.5):
@@ -523,7 +523,8 @@ class LongitudinalMpc:
       w_raw = v_ego / v_start_thr
       w = np.clip(w_raw, 0.12, 0.4)
       #w = np.clip(w_raw + 0.2, 0.0, 1.0)
-      x_mixed = (1 - w) * np.min(x_and_cruise, axis=1) + w * np.max(x_and_cruise, axis=1)
+      #x_mixed = (1 - w) * np.min(x_and_cruise, axis=1) + w * np.max(x_and_cruise, axis=1)
+      x_mixed = 0.85 * np.min(x_and_cruise, axis=1) + 0.15 * np.max(x_and_cruise, axis=1)
       x = x_mixed
       #================================================================
 
