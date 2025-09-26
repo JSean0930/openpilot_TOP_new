@@ -470,17 +470,28 @@ class LongitudinalMpc:
   def update(self, radarstate, v_cruise, x, v, a, j, personality=log.LongitudinalPersonality.standard, dynamic_follow=False, pitch_rad=0.0):
     # t_follow = get_T_FOLLOW(personality)
     v_ego = self.x0[1]
+    #===================================================================
+    # 判斷是否有前車（任一個 lead 有效即視為有前車）
+    has_lead = bool((radarstate.leadOne is not None and radarstate.leadOne.status) or
+                    (radarstate.leadTwo is not None and radarstate.leadTwo.status))
+
+    # 有前車 → 使用 v_ego 函式；無前車 → 使用外部 v_cruise（原始邏輯）
+    v_cruise_cmd = get_dynamic_v_cruise(v_ego) if has_lead else float(v_cruise)
+    #===================================================================
     t_follow = get_T_FOLLOW(personality) if not dynamic_follow else get_dynamic_follow(v_ego, personality)
     stop_distance = get_STOP_DISTANCE(personality)
     self.downhill = np.sin(pitch_rad) < -0.04
 
     if self.downhill:
-      t_follow += 0.1
+      t_follow += 0.0
 
     if Params().get_bool("ToyotaTune") and not (self.CP.flags & ToyotaFlags.SMART_DSU):
       stop_distance += 3.0
-
-    self.status = radarstate.leadOne.status or radarstate.leadTwo.status
+    #===================================================================
+    # 將有無前車狀態記錄（供其他邏輯參考）
+    self.status = has_lead
+    #self.status = radarstate.leadOne.status or radarstate.leadTwo.status
+    #===================================================================
 
     a_cruise_min = self.accel_controller._get_min_accel_for_speed(v_ego)
 
