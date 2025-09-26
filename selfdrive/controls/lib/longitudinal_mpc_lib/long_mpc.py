@@ -76,6 +76,32 @@ def get_danger_zone_cost(v_ego):
   else:
     return 200.0
 #===================================================================
+# ================================================================
+# 依 v_ego 設定動態 v_cruise（單位：m/s）
+# 需求：最低30km/h、最高125km/h，中間分段跳階，隨 v_ego 增減而遞增/遞減
+#   v_ego < 30 km/h        → v_cruise = 35 km/h
+#   30 ≤ v_ego < 50 km/h   → v_cruise = 55 km/h
+#   50 ≤ v_ego < 70 km/h   → v_cruise = 75 km/h
+#   70 ≤ v_ego < 90 km/h   → v_cruise = 95 km/h
+#   90 ≤ v_ego < 110 km/h  → v_cruise = 115 km/h
+#   v_ego ≥ 110 km/h       → v_cruise = 125 km/h
+# 備註：回傳值為 m/s；此為「跳階」邏輯（非連續插值），加減速皆對應跳階
+def get_dynamic_v_cruise(v_ego: float) -> float:
+  v_kph = float(v_ego * 3.6)
+  if v_kph < 30.0:
+    v_cruise_kph = 35.0
+  elif v_kph < 50.0:
+    v_cruise_kph = 55.0
+  elif v_kph < 70.0:
+    v_cruise_kph = 75.0
+  elif v_kph < 90.0:
+    v_cruise_kph = 95.0
+  elif v_kph < 110.0:
+    v_cruise_kph = 115.0
+  else:
+    v_cruise_kph = 125.0
+  return v_cruise_kph / 3.6
+#===================================================================
 def get_jerk_factor(personality=log.LongitudinalPersonality.standard):
   if personality==log.LongitudinalPersonality.relaxed:
     return 1.0
