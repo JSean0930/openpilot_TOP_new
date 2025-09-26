@@ -158,7 +158,7 @@ def get_stopped_equivalence_factor(v_lead, v_ego):
   # KRKeegan this offset rapidly decreases the following distance when the lead pulls
   # away, resulting in an early demand for acceleration.
   v_diff_offset = 0
-  v_diff_offset_max = 8 #10
+  v_diff_offset_max = 6 #10
   speed_to_reach_max_v_diff_offset = 10 # in kp/h 15
   speed_to_reach_max_v_diff_offset = speed_to_reach_max_v_diff_offset * CV.KPH_TO_MS
   delta_speed = v_lead - v_ego
@@ -474,10 +474,10 @@ class LongitudinalMpc:
     v_lead0 = float(lead_xv_0[0, 1])
     v_lead1 = float(lead_xv_1[0, 1])
 
-    if v_ego > low_thr:
+    if v_ego > mid_thr:
       self.mode = 'acc'
       self.set_weights(prev_accel_constraint=True, personality=personality, v_lead0=v_lead0, v_lead1=v_lead1)
-    elif v_ego <= low_thr:
+    elif v_ego <= mid_thr:
       self.mode = 'blended'
       self.set_weights(prev_accel_constraint=True, personality=personality, v_lead0=v_lead0, v_lead1=v_lead1)
     #================================================================
