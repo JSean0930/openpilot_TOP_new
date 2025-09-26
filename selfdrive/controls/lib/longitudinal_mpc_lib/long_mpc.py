@@ -529,7 +529,7 @@ class LongitudinalMpc:
       v_lower = v_ego + (T_IDXS * cruise_min_accel_val * 1.05)
       # TODO does this make sense when max_a is negative?
       v_upper = v_ego + (T_IDXS * CRUISE_MAX_ACCEL * 1.05)
-      v_cruise_clipped = np.clip(v_cruise * np.ones(N+1),
+      v_cruise_clipped = np.clip(v_cruise_cmd * np.ones(N+1),
                                  v_lower,
                                  v_upper)
       cruise_obstacle = np.cumsum(T_DIFFS * v_cruise_clipped) + get_safe_obstacle_distance(v_cruise_clipped, t_follow, stop_distance)
@@ -544,7 +544,7 @@ class LongitudinalMpc:
 
       x_obstacles = np.column_stack([lead_0_obstacle,
                                      lead_1_obstacle])
-      cruise_target = T_IDXS * np.clip(v_cruise, v_ego - 5.0, 1e3) + x[0]
+      cruise_target = T_IDXS * np.clip(v_cruise_cmd, v_ego - 5.0, 1e3) + x[0]
       xforward = ((v[1:] + v[:-1]) / 2) * (T_IDXS[1:] - T_IDXS[:-1])
       x = np.cumsum(np.insert(xforward, 0, x[0]))
 
