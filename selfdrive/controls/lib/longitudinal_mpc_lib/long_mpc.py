@@ -476,7 +476,8 @@ class LongitudinalMpc:
                     (radarstate.leadTwo is not None and radarstate.leadTwo.status))
 
     # 有前車 → 使用 v_ego 函式；無前車 → 使用外部 v_cruise（原始邏輯）
-    v_cruise_cmd = get_dynamic_v_cruise(v_ego) if has_lead else float(v_cruise)
+    #v_cruise_cmd = get_dynamic_v_cruise(v_ego) if has_lead else float(v_cruise)
+    v_cruise_cmd = min(get_dynamic_v_cruise(v_ego), float(v_cruise)) if has_lead else float(v_cruise)
     #===================================================================
     t_follow = get_T_FOLLOW(personality) if not dynamic_follow else get_dynamic_follow(v_ego, personality)
     stop_distance = get_STOP_DISTANCE(personality)
@@ -556,12 +557,11 @@ class LongitudinalMpc:
       # ★ 調整權重：低速接近 0，高速趨近 0.98（幾乎等於 ACC，但仍保留 e2e 決策）
       #w_raw = (v_ego - low_thr) / max(1e-6, (high_thr - low_thr))
       #w_raw = v_ego / max(1e-6, (high_thr - low_thr))
-      v_start_thr = 70 / 3.6
+      v_start_thr = 50 / 3.6
       w_raw = v_ego / v_start_thr
-      w = np.clip(w_raw, 0.12, 0.4)
-      #w = np.clip(w_raw + 0.2, 0.0, 1.0)
-      #x_mixed = (1 - w) * np.min(x_and_cruise, axis=1) + w * np.max(x_and_cruise, axis=1)
-      x_mixed = 0.85 * np.min(x_and_cruise, axis=1) + 0.15 * np.max(x_and_cruise, axis=1)
+      w = np.clip(w_raw, 0.12, 1.0)
+      x_mixed = (1 - w) * np.min(x_and_cruise, axis=1) + w * np.max(x_and_cruise, axis=1)
+      #x_mixed = 0.85 * np.min(x_and_cruise, axis=1) + 0.15 * np.max(x_and_cruise, axis=1)
       x = x_mixed
       #================================================================
 
