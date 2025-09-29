@@ -89,15 +89,15 @@ def get_danger_zone_cost(v_ego):
 def get_dynamic_v_cruise(v_ego: float) -> float:
   v_kph = float(v_ego * 3.6)
   if v_kph < 30.0:
-    v_cruise_kph = 35.0
+    v_cruise_kph = 45.0
   elif v_kph < 50.0:
-    v_cruise_kph = 55.0
+    v_cruise_kph = 65.0
   elif v_kph < 70.0:
-    v_cruise_kph = 75.0
+    v_cruise_kph = 85.0
   elif v_kph < 90.0:
-    v_cruise_kph = 95.0
+    v_cruise_kph = 105.0
   elif v_kph < 110.0:
-    v_cruise_kph = 115.0
+    v_cruise_kph = 120.0
   else:
     v_cruise_kph = 125.0
   return v_cruise_kph / 3.6
@@ -151,19 +151,19 @@ def get_dynamic_follow(v_ego, personality=log.LongitudinalPersonality.standard):
 
   if personality == log.LongitudinalPersonality.relaxed:
     base = 1.55 + 0.0040 * v_kph   # 0 km/h→1.25s，100 km/h→~1.85s
-    t_min, t_max = 1.35, 1.90
+    t_min, t_max = 1.25, 1.90
   elif personality == log.LongitudinalPersonality.standard:
     base = 1.40 + 0.0025 * v_kph   # 0 km/h→1.10s，100 km/h→~1.55s
-    t_min, t_max = 1.20, 1.70
+    t_min, t_max = 1.10, 1.70
   elif personality == log.LongitudinalPersonality.aggressive:
     base = 1.35 + 0.0010 * v_kph   # 0 km/h→0.95s，100 km/h→~1.25s
-    t_min, t_max = 1.15, 1.40
+    t_min, t_max = 1.05, 1.40
   else:
     raise NotImplementedError("Dynamic Follow personality not supported")
 
   # 低速人性化緩衝：停走/起步給更長一點距離，隨速度消退
   # 0→+0.25s, 5 km/h→+0.20s, 15 km/h→+0.00s
-  low_speed_boost = np.interp(v_kph, [0.0, 10.0], [-0.3, 0.0])
+  low_speed_boost = np.interp(v_kph, [0.0, 10.0, 50.0, 60.0], [-0.3, 0.0, 0.2, -0.2])
 
   t_follow = base + low_speed_boost
   return float(np.clip(t_follow, t_min, t_max))
@@ -544,7 +544,7 @@ class LongitudinalMpc:
 
       x_obstacles = np.column_stack([lead_0_obstacle,
                                      lead_1_obstacle])
-      cruise_target = T_IDXS * np.clip(v_cruise_cmd, v_ego - 5.0, 1e3) + x[0]
+      cruise_target = T_IDXS * np.clip(v_cruise_cmd, v_ego - 3.0, 1e3) + x[0]
       xforward = ((v[1:] + v[:-1]) / 2) * (T_IDXS[1:] - T_IDXS[:-1])
       x = np.cumsum(np.insert(xforward, 0, x[0]))
 
