@@ -163,7 +163,7 @@ def get_dynamic_follow(v_ego, personality=log.LongitudinalPersonality.standard):
 
   # 低速人性化緩衝：停走/起步給更長一點距離，隨速度消退
   # 0→+0.25s, 5 km/h→+0.20s, 15 km/h→+0.00s
-  low_speed_boost = np.interp(v_kph, [0.0, 10.0, 50.0, 60.0], [-0.2, 0.0, 0.3, -0.3])
+  low_speed_boost = np.interp(v_kph, [0.0, 10.0, 50.0, 60.0], [-0.2, 0.0, 0.4, -0.4])
 
   t_follow = base + low_speed_boost
   return float(np.clip(t_follow, t_min, t_max))
@@ -184,7 +184,7 @@ def get_stopped_equivalence_factor(v_lead, v_ego):
   # KRKeegan this offset rapidly decreases the following distance when the lead pulls
   # away, resulting in an early demand for acceleration.
   v_diff_offset = 0
-  v_diff_offset_max = 6 #10
+  v_diff_offset_max = 8 #10
   speed_to_reach_max_v_diff_offset = 10 # in kp/h 15
   speed_to_reach_max_v_diff_offset = speed_to_reach_max_v_diff_offset * CV.KPH_TO_MS
   delta_speed = v_lead * 2 - v_ego
