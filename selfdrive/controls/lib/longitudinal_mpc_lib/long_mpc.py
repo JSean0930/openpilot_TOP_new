@@ -166,7 +166,7 @@ def get_dynamic_follow(v_ego, personality=log.LongitudinalPersonality.standard):
   low_speed_boost = np.interp(v_kph, [0.0, 10.0, 50.0, 60.0], [-0.2, 0.0, 0.4, -0.4])
   
   #t_follow = base + low_speed_boost
-  t_follow = base - 0.6
+  t_follow = base - 0.8
   return float(np.clip(t_follow, t_min, t_max))
 #==================
 
