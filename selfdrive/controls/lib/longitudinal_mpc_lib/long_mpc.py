@@ -157,16 +157,17 @@ def get_dynamic_follow(v_ego, personality=log.LongitudinalPersonality.standard):
     t_min, t_max = 1.10, 1.70
   elif personality == log.LongitudinalPersonality.aggressive:
     base = 1.35 + 0.0010 * v_kph   # 0 km/h→0.95s，100 km/h→~1.25s
-    t_min, t_max = 1.05, 1.40
+    #t_min, t_max = 1.05, 1.40
+    t_min, t_max = 0.85, 1.40
   else:
     raise NotImplementedError("Dynamic Follow personality not supported")
 
   # 低速人性化緩衝：停走/起步給更長一點距離，隨速度消退
   # 0→+0.25s, 5 km/h→+0.20s, 15 km/h→+0.00s
-  low_speed_boost = np.interp(v_kph, [0.0, 10.0, 50.0, 60.0], [-0.2, 0.0, 0.4, -0.4])
-  
-  #t_follow = base + low_speed_boost
-  t_follow = base - 0.8
+  #low_speed_boost = np.interp(v_kph, [0.0, 10.0, 50.0, 60.0], [-0.2, 0.0, 0.4, -0.4])
+  low_speed_boost = np.interp(v_kph, [0.0, 10.0, 50.0, 60.0], [-0.3, -0.2, -0.2, 0.0])
+  t_follow = base + low_speed_boost
+
   return float(np.clip(t_follow, t_min, t_max))
 #==================
 
