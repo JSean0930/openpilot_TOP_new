@@ -88,10 +88,10 @@ def get_danger_zone_cost(v_ego):
 # 備註：回傳值為 m/s；此為「跳階」邏輯（非連續插值），加減速皆對應跳階
 def get_dynamic_v_cruise(v_ego: float) -> float:
   v_kph = float(v_ego * 3.6)
-  if v_kph < 30.0:
-    v_cruise_kph = 45.0
-  elif v_kph < 50.0:
-    v_cruise_kph = 65.0
+  if v_kph < 20.0:
+    v_cruise_kph = 30.0
+  elif v_kph < 40.0:
+    v_cruise_kph = 50.0
   elif v_kph < 70.0:
     v_cruise_kph = 85.0
   elif v_kph < 90.0:
@@ -187,7 +187,7 @@ def get_stopped_equivalence_factor(v_lead, v_ego):
   # away, resulting in an early demand for acceleration.
   v_diff_offset = 0
   v_diff_offset_max = 7 #10
-  speed_to_reach_max_v_diff_offset = 7 # in kp/h 15
+  speed_to_reach_max_v_diff_offset = 5 # in kp/h 15
   speed_to_reach_max_v_diff_offset = speed_to_reach_max_v_diff_offset * CV.KPH_TO_MS
   delta_speed = v_lead * 2 - v_ego
   if np.all(delta_speed > 0.5):
