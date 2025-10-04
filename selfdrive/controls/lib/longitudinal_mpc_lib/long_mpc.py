@@ -90,14 +90,14 @@ def get_dynamic_v_cruise(v_ego: float) -> float:
   v_kph = float(v_ego * 3.6)
   if v_kph < 20.0:
     v_cruise_kph = 30.0
-  elif v_kph < 40.0:
-    v_cruise_kph = 50.0
-  elif v_kph < 70.0:
-    v_cruise_kph = 85.0
-  elif v_kph < 90.0:
-    v_cruise_kph = 105.0
-  elif v_kph < 110.0:
-    v_cruise_kph = 120.0
+  elif v_kph < 30.0:
+    v_cruise_kph = 40.0
+  elif v_kph < 50.0:
+    v_cruise_kph = 60.0
+  elif v_kph < 80.0:
+    v_cruise_kph = 100.0
+  elif v_kph < 100.0:
+    v_cruise_kph = 110.0
   else:
     v_cruise_kph = 125.0
   return v_cruise_kph / 3.6
@@ -150,15 +150,15 @@ def get_dynamic_follow(v_ego, personality=log.LongitudinalPersonality.standard):
   v_kph = float(v_ego * 3.6)
 
   if personality == log.LongitudinalPersonality.relaxed:
-    base = 1.55 + 0.0040 * v_kph   # 0 km/h→1.25s，100 km/h→~1.85s
-    t_min, t_max = 1.25, 1.90
+    base = 1.35 + 0.0040 * v_kph   # 0 km/h→1.25s，100 km/h→~1.85s
+    t_min, t_max = 1.05, 1.70
   elif personality == log.LongitudinalPersonality.standard:
-    base = 1.40 + 0.0025 * v_kph   # 0 km/h→1.10s，100 km/h→~1.55s
-    t_min, t_max = 1.10, 1.70
+    base = 1.20 + 0.0025 * v_kph   # 0 km/h→1.10s，100 km/h→~1.55s
+    t_min, t_max = 0.90, 1.50
   elif personality == log.LongitudinalPersonality.aggressive:
-    base = 1.35 + 0.0010 * v_kph   # 0 km/h→0.95s，100 km/h→~1.25s
+    base = 1.15 + 0.0010 * v_kph   # 0 km/h→0.95s，100 km/h→~1.25s
     #t_min, t_max = 1.05, 1.40
-    t_min, t_max = 0.85, 1.40
+    t_min, t_max = 0.85, 1.20
   else:
     raise NotImplementedError("Dynamic Follow personality not supported")
 
@@ -186,7 +186,7 @@ def get_stopped_equivalence_factor(v_lead, v_ego):
   # KRKeegan this offset rapidly decreases the following distance when the lead pulls
   # away, resulting in an early demand for acceleration.
   v_diff_offset = 0
-  v_diff_offset_max = 7 #10
+  v_diff_offset_max = 6 #10
   speed_to_reach_max_v_diff_offset = 5 # in kp/h 15
   speed_to_reach_max_v_diff_offset = speed_to_reach_max_v_diff_offset * CV.KPH_TO_MS
   delta_speed = v_lead * 2 - v_ego
