@@ -99,9 +99,9 @@ def get_dynamic_v_cruise(v_ego: float) -> float:
   if v_kph < 20.0:
     v_cruise_kph = 30.0
   elif v_kph < 30.0:
-    v_cruise_kph = 40.0
+    v_cruise_kph = 50.0
   elif v_kph < 50.0:
-    v_cruise_kph = 60.0
+    v_cruise_kph = 70.0
   elif v_kph < 80.0:
     v_cruise_kph = 100.0
   elif v_kph < 100.0:
