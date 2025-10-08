@@ -69,13 +69,20 @@ low_thr  = 30.0 / 3.6   # km/hr to m/s
 mid_thr = 50.0 / 3.6   # km/hr to m/s
 high_thr = 70.0 / 3.6
 #===================================================================
+#def get_danger_zone_cost(v_ego):
+  #if v_ego <= start_thr:
+    #return 300.0
+  #elif v_ego <= mid_thr:
+    #return 350.0
+  #else:
+    #return 200.0
+    
 def get_danger_zone_cost(v_ego):
-  if v_ego <= start_thr:
-    return 300.0
-  elif v_ego <= mid_thr:
-    return 350.0
-  else:
-    return 200.0
+  v_kph = float(v_ego * 3.6)
+  cost_base = 300
+  cost_v = np.interp(v_kph, [0.0, 50.0], [0.0, 100.0])
+  zone_cost = cost_base - cost_v
+  return zone_cost
 #===================================================================
 # ================================================================
 # 依 v_ego 設定動態 v_cruise（單位：m/s）
