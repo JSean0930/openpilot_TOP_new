@@ -165,8 +165,8 @@ def get_dynamic_follow(v_ego, personality=log.LongitudinalPersonality.standard):
 
   # 低速人性化緩衝：停走/起步給更長一點距離，隨速度消退
   # 0→+0.25s, 5 km/h→+0.20s, 15 km/h→+0.00s
-  #low_speed_boost = np.interp(v_kph, [0.0, 10.0, 50.0, 60.0], [-0.2, 0.0, 0.4, -0.4])
-  low_speed_boost = np.interp(v_kph, [0.0, 10.0, 50.0, 60.0], [-0.3, -0.2, -0.2, 0.0])
+  low_speed_boost = np.interp(v_kph, [0.0, 10.0, 50.0, 60.0], [-0.2, 0.0, 0.4, -0.4])
+  #low_speed_boost = np.interp(v_kph, [0.0, 10.0, 50.0, 60.0], [-0.3, -0.2, -0.2, 0.0])
   t_follow = base + low_speed_boost
 
   return float(np.clip(t_follow, t_min, t_max))
@@ -515,15 +515,15 @@ class LongitudinalMpc:
     v_lead0 = float(lead_xv_0[0, 1])
     v_lead1 = float(lead_xv_1[0, 1])
 
-    #if v_ego > mid_thr:
-      #self.mode = 'acc'
-      #self.set_weights(prev_accel_constraint=True, personality=personality, v_lead0=v_lead0, v_lead1=v_lead1)
-    #elif v_ego <= mid_thr:
-      #self.mode = 'blended'
-      #self.set_weights(prev_accel_constraint=True, personality=personality, v_lead0=v_lead0, v_lead1=v_lead1)
+    if v_ego > mid_thr:
+      self.mode = 'acc'
+      self.set_weights(prev_accel_constraint=True, personality=personality, v_lead0=v_lead0, v_lead1=v_lead1)
+    elif v_ego <= mid_thr:
+      self.mode = 'blended'
+      self.set_weights(prev_accel_constraint=True, personality=personality, v_lead0=v_lead0, v_lead1=v_lead1)
 
-    self.mode = 'acc'
-    self.set_weights(prev_accel_constraint=True, personality=personality, v_lead0=v_lead0, v_lead1=v_lead1)
+    #self.mode = 'acc'
+    #self.set_weights(prev_accel_constraint=True, personality=personality, v_lead0=v_lead0, v_lead1=v_lead1)
     #================================================================
 
     # Update in ACC mode or ACC/e2e blend
