@@ -79,9 +79,9 @@ high_thr = 70.0 / 3.6
     
 def get_danger_zone_cost(v_ego):
   v_kph = float(v_ego * 3.6)
-  cost_base = 300
-  cost_v = np.interp(v_kph, [0.0, 50.0], [0.0, 100.0])
-  zone_cost = cost_base - cost_v
+  cost_base = 100
+  cost_v = np.interp(v_kph, [0.0, 60.0], [0.0, 100.0])
+  zone_cost = cost_base + cost_v
   return zone_cost
 #===================================================================
 # ================================================================
@@ -96,8 +96,10 @@ def get_danger_zone_cost(v_ego):
 # 備註：回傳值為 m/s；此為「跳階」邏輯（非連續插值），加減速皆對應跳階
 def get_dynamic_v_cruise(v_ego: float) -> float:
   v_kph = float(v_ego * 3.6)
-  if v_kph < 20.0:
-    v_cruise_kph = 30.0
+  if v_kph < 5.0:
+    v_cruise_kph = 130.0
+  elif v_kph < 20.0:
+    v_cruise_kph = 35.0
   elif v_kph < 30.0:
     v_cruise_kph = 50.0
   elif v_kph < 50.0:
@@ -172,8 +174,8 @@ def get_dynamic_follow(v_ego, personality=log.LongitudinalPersonality.standard):
 
   # 低速人性化緩衝：停走/起步給更長一點距離，隨速度消退
   # 0→+0.25s, 5 km/h→+0.20s, 15 km/h→+0.00s
-  low_speed_boost = np.interp(v_kph, [0.0, 10.0, 50.0, 60.0], [-0.2, 0.0, 0.4, -0.4])
-  #low_speed_boost = np.interp(v_kph, [0.0, 10.0, 50.0, 60.0], [-0.3, -0.2, -0.2, 0.0])
+  #low_speed_boost = np.interp(v_kph, [0.0, 10.0, 50.0, 60.0], [-0.2, 0.0, 0.4, -0.4])
+  low_speed_boost = np.interp(v_kph, [0.0, 10.0, 50.0, 60.0], [-0.3, -0.2, -0.2, 0.0])
   t_follow = base + low_speed_boost
 
   return float(np.clip(t_follow, t_min, t_max))
