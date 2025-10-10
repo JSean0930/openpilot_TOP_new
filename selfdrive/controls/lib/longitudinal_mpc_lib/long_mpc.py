@@ -59,7 +59,7 @@ T_IDXS = (np.linspace(0, 1, N + 1) ** 1.65) * MAX_T
 #T_IDXS = np.array(T_IDXS_LST)
 FCW_IDXS = T_IDXS < 5.0
 T_DIFFS = np.diff(T_IDXS, prepend=[0.])
-COMFORT_BRAKE = 1.8
+COMFORT_BRAKE = 1.7#1.8
 # STOP_DISTANCE = 6.0
 CRUISE_MIN_ACCEL = -1.2
 CRUISE_MAX_ACCEL = 1.6
@@ -79,7 +79,7 @@ high_thr = 70.0 / 3.6
     
 def get_danger_zone_cost(v_ego):
   v_kph = float(v_ego * 3.6)
-  cost_base = 100
+  cost_base = 150
   cost_v = np.interp(v_kph, [0.0, 60.0], [0.0, 100.0])
   zone_cost = cost_base + cost_v
   return zone_cost
