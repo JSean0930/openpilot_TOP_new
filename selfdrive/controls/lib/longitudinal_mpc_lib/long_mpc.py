@@ -79,7 +79,7 @@ high_thr = 70.0 / 3.6
     
 def get_danger_zone_cost(v_ego):
   v_kph = float(v_ego * 3.6)
-  cost_base = 150
+  cost_base = 100
   cost_v = np.interp(v_kph, [0.0, 60.0], [0.0, 100.0])
   zone_cost = cost_base + cost_v
   return zone_cost
