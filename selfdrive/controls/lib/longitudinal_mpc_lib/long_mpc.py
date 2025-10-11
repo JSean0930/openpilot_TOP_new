@@ -48,23 +48,37 @@ ACADOS_SOLVER_TYPE = 'SQP_RTI'
 
 # Fewer timestamps don't hurt performance and lead to
 # much better convergence of the MPC with low iterations
-N = 12
-MAX_T = 10.0
-T_IDXS_LST = [index_function(idx, max_val=MAX_T, max_idx=N) for idx in range(N+1)]
-
-T_IDXS = np.array(T_IDXS_LST)
+N = 16 #12
+MAX_T = 15.0 #10.0
+T_IDXS = (np.linspace(0, 1, N + 1) ** 1.65) * MAX_T
+#T_IDXS_LST = [index_function(idx, max_val=MAX_T, max_idx=N) for idx in range(N+1)]
+#T_IDXS = np.array(T_IDXS_LST)
 FCW_IDXS = T_IDXS < 5.0
 T_DIFFS = np.diff(T_IDXS, prepend=[0.])
 COMFORT_BRAKE = 2.5
 # STOP_DISTANCE = 6.0
+#===================================================================
+start_thr = 10.0 / 3.6
+low_thr  = 30.0 / 3.6   # km/hr to m/s
+mid_thr = 50.0 / 3.6   # km/hr to m/s
+high_thr = 70.0 / 3.6
+#===================================================================
+def get_danger_zone_cost(v_ego):
+  if v_ego <= start_thr:
+    return 100.0
+  elif v_ego <= mid_thr:
+    return 150.0
+  else:
+    return 200.0
+#===================================================================
 
 def get_jerk_factor(personality=log.LongitudinalPersonality.standard):
   if personality==log.LongitudinalPersonality.relaxed:
     return 1.0
   elif personality==log.LongitudinalPersonality.standard:
-    return 0.5
+    return 0.8
   elif personality==log.LongitudinalPersonality.aggressive:
-    return 0.22
+    return 0.8
   else:
     raise NotImplementedError("Longitudinal personality not supported")
 
