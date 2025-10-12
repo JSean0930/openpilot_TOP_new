@@ -17,7 +17,7 @@ HISTORY_LENGTH = 10  # 曲率歷史長度
 SMOOTHING_ALPHA = 0.3  # 目標速度平滑因子
 
 # 提前預測參數
-PREDICT_SEC_AHEAD = 3.5  # 預測未來曲率的時間視野 (秒)
+PREDICT_SEC_AHEAD = 4.0  # 預測未來曲率的時間視野 (秒)
 WEIGHT_HISTORY = 0.3  # 歷史曲率權重
 WEIGHT_FUTURE = 0.7   # 未來曲率權重
 
