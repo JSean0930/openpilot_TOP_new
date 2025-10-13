@@ -19,7 +19,6 @@ from openpilot.common.simple_kalman import KF1D
 #   - vision_only    : 幾乎純視覺（保留極低速安全覆蓋）
 #   - hybrid (default): 視覺為主、雷達小幅混合（嚴格匹配，高速不混合）
 #   - radar_strong   : 偏雷達（允許較強覆蓋與高速混合）
-# 透過 Params() 鍵 "RadarVisionMode" 設定；未設則為 "hybrid"
 # ===============================================================
 
 
@@ -36,10 +35,24 @@ RADAR_TO_CAMERA = 1.52
 
 def _get_mode_from_params() -> str:
   """
-  從 Params 讀取模式（RadarVisionMode），允許：
-    "vision_only" / "hybrid" / "radar_strong"
-  若未設定或不合法，回退 "hybrid"
+  設定雷達與視覺融合模式（手動指定）：
+    可選：
+      - "vision_only"   : 幾乎全視覺（保留低速安全覆蓋）
+      - "hybrid"        : 預設模式，視覺為主、雷達小幅混合（最平衡）
+      - "radar_strong"  : 偏雷達（允許高速混合）
+  【建議用法】
+    直接在下方修改一行：
+      mode = "vision_only"   ← 改成 "hybrid" 或 "radar_strong" 即可切換
+  若想恢復為從 Params("RadarVisionMode") 讀取，將下方兩行「mode/return」註解掉，
+  函式會回退到自動讀取邏輯。
   """
+  # ================================================
+  # 手動指定模式（直接在此修改即可）
+  mode = "vision_only"
+  return mode
+  # ================================================
+
+  # ↓ 若未手動指定，保留以下自動讀取邏輯（此區預設不會被執行）
   try:
     val = Params().get("RadarVisionMode")
     if val is None:
@@ -72,9 +85,9 @@ def _mode_thresholds(mode: str):
 def _alpha_by_speed(mode: str, v_ego: float) -> float:
   """
   雷達混合權重 alpha（0~1，越小越偏視覺）
-   - vision_only  : 更偏視覺，低速 0.25 → 高速 0.0
+   - vision_only  : 更偏視覺，低速 0.25 → 中速 0.18 → 高速 0.0
    - hybrid       : 低速 0.30 → 中速 0.22 → 高速 0.0（不允許高速混合）
-   - radar_strong : 低速 0.45 → 高速 0.20（高速仍允許混合）
+   - radar_strong : 低速 0.45 → 中速 0.33 → 高速 0.20（高速仍允許混合）
   """
   if mode == "vision_only":
     return float(np.interp(v_ego, [0.0, 10.0, 20.0], [0.25, 0.18, 0.0]))
