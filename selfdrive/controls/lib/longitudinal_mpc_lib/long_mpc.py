@@ -160,13 +160,13 @@ def get_dynamic_follow(v_ego, personality=log.LongitudinalPersonality.standard):
   v_kph = float(v_ego * 3.6)
 
   if personality == log.LongitudinalPersonality.relaxed:
-    base = 1.15 + 0.0040 * v_kph   # 0 km/h→1.25s，100 km/h→~1.85s
+    base = 1.2 + 0.0040 * v_kph   # 0 km/h→1.25s，100 km/h→~1.85s
     t_min, t_max = 0.85, 1.70
   elif personality == log.LongitudinalPersonality.standard:
-    base = 1.0 + 0.0025 * v_kph   # 0 km/h→1.10s，100 km/h→~1.55s
+    base = 1.1 + 0.0025 * v_kph   # 0 km/h→1.10s，100 km/h→~1.55s
     t_min, t_max = 0.70, 1.50
   elif personality == log.LongitudinalPersonality.aggressive:
-    base = 0.9 + 0.0010 * v_kph   # 0 km/h→0.95s，100 km/h→~1.25s
+    base = 1.0 + 0.0010 * v_kph   # 0 km/h→0.95s，100 km/h→~1.25s
     #t_min, t_max = 1.05, 1.40
     t_min, t_max = 0.6, 1.20
   else:
@@ -183,11 +183,11 @@ def get_dynamic_follow(v_ego, personality=log.LongitudinalPersonality.standard):
 
 def get_STOP_DISTANCE(personality=log.LongitudinalPersonality.standard):
   if personality==log.LongitudinalPersonality.relaxed:
-    return 6.0
+    return 5.0
   elif personality==log.LongitudinalPersonality.standard:
-    return 6.0
+    return 5.0
   elif personality==log.LongitudinalPersonality.aggressive:
-    return 6.0
+    return 5.0
   else:
     raise NotImplementedError("Longitudinal personality not supported")
 
