@@ -160,10 +160,10 @@ def get_dynamic_follow(v_ego, personality=log.LongitudinalPersonality.standard):
   v_kph = float(v_ego * 3.6)
 
   if personality == log.LongitudinalPersonality.relaxed:
-    base = 1.2 + 0.0040 * v_kph   # 0 km/h→1.25s，100 km/h→~1.85s
+    base = 1.0 + 0.0040 * v_kph   # 0 km/h→1.25s，100 km/h→~1.85s
     t_min, t_max = 1.0, 1.70
   elif personality == log.LongitudinalPersonality.standard:
-    base = 1.1 + 0.0025 * v_kph   # 0 km/h→1.10s，100 km/h→~1.55s
+    base = 1.0 + 0.0025 * v_kph   # 0 km/h→1.10s，100 km/h→~1.55s
     t_min, t_max = 1.0, 1.50
   elif personality == log.LongitudinalPersonality.aggressive:
     base = 1.0 + 0.0010 * v_kph   # 0 km/h→0.95s，100 km/h→~1.25s
