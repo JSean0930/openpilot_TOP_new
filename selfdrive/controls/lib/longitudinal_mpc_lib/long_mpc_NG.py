@@ -70,12 +70,12 @@ mid_thr = 50.0 / 3.6   # km/hr to m/s
 high_thr = 70.0 / 3.6
 #===================================================================
 def get_danger_zone_cost(v_ego):
-  if v_ego <= start_thr:
-    return 150.0
+  if v_ego <= low_thr:
+    return 100.0
   elif v_ego <= mid_thr:
-    return 200.0
+    return 150.0
   else:
-    return 250.0
+    return 200.0
     
 #def get_danger_zone_cost(v_ego):
   #v_kph = float(v_ego * 3.6)
@@ -161,14 +161,14 @@ def get_dynamic_follow(v_ego, personality=log.LongitudinalPersonality.standard):
 
   if personality == log.LongitudinalPersonality.relaxed:
     base = 1.0 + 0.0040 * v_kph   # 0 km/h→1.25s，100 km/h→~1.85s
-    t_min, t_max = 1.0, 1.70
+    t_min, t_max = 0.9, 1.70
   elif personality == log.LongitudinalPersonality.standard:
     base = 1.0 + 0.0025 * v_kph   # 0 km/h→1.10s，100 km/h→~1.55s
-    t_min, t_max = 1.0, 1.50
+    t_min, t_max = 0.9, 1.50
   elif personality == log.LongitudinalPersonality.aggressive:
     base = 1.0 + 0.0010 * v_kph   # 0 km/h→0.95s，100 km/h→~1.25s
     #t_min, t_max = 1.05, 1.40
-    t_min, t_max = 1.0, 1.30
+    t_min, t_max = 0.9, 1.30
   else:
     raise NotImplementedError("Dynamic Follow personality not supported")
 
@@ -196,8 +196,8 @@ def get_stopped_equivalence_factor(v_lead, v_ego):
   # KRKeegan this offset rapidly decreases the following distance when the lead pulls
   # away, resulting in an early demand for acceleration.
   v_diff_offset = 0
-  v_diff_offset_max = 10
-  speed_to_reach_max_v_diff_offset = 5 # in kp/h 15
+  v_diff_offset_max = 15
+  speed_to_reach_max_v_diff_offset = 15 # in kp/h 15
   speed_to_reach_max_v_diff_offset = speed_to_reach_max_v_diff_offset * CV.KPH_TO_MS
   delta_speed = v_lead - v_ego
   if np.all(delta_speed > 0.5):
@@ -432,7 +432,7 @@ class LongitudinalMpc:
       constraint_cost_weights = [LIMIT_COST, LIMIT_COST, LIMIT_COST, danger_cost]
     elif self.mode == 'blended':
       if v_ego <= high_thr:
-        j_comf *= 10.0
+        j_comf *= 5.0 #10.0
       a_change_cost = 40.0 if prev_accel_constraint else 0
       cost_weights = [0., 0.1, 0.2, 5.0, a_change_cost, j_ego_v_ego * jerk_factor * j_comf]
       constraint_cost_weights = [LIMIT_COST, LIMIT_COST, LIMIT_COST, danger_cost]
@@ -580,7 +580,7 @@ class LongitudinalMpc:
       x = x_mixed
       #================================================================
 
-      self.source = 'e2e' if x_and_cruise[1,0] < x_and_cruise[1,1] else 'cruise'
+      self.source = 'e2e' if x_and_cruise[1,0] > x_and_cruise[1,1] else 'cruise'
 
     else:
       raise NotImplementedError(f'Planner mode {self.mode} not recognized in planner update')
