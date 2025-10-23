@@ -196,7 +196,7 @@ def get_stopped_equivalence_factor(v_lead, v_ego):
   # KRKeegan this offset rapidly decreases the following distance when the lead pulls
   # away, resulting in an early demand for acceleration.
   v_diff_offset = 0
-  v_diff_offset_max = 15
+  v_diff_offset_max = 10
   speed_to_reach_max_v_diff_offset = 15 # in kp/h 15
   speed_to_reach_max_v_diff_offset = speed_to_reach_max_v_diff_offset * CV.KPH_TO_MS
   delta_speed = v_lead - v_ego
@@ -524,10 +524,10 @@ class LongitudinalMpc:
     v_lead0 = float(lead_xv_0[0, 1])
     v_lead1 = float(lead_xv_1[0, 1])
 
-    if v_ego > mid_thr:
+    if v_ego > high_thr:
       self.mode = 'acc'
       self.set_weights(prev_accel_constraint=True, personality=personality, v_lead0=v_lead0, v_lead1=v_lead1)
-    elif v_ego <= mid_thr:
+    elif v_ego <= high_thr:
       self.mode = 'blended'
       self.set_weights(prev_accel_constraint=True, personality=personality, v_lead0=v_lead0, v_lead1=v_lead1)
 
@@ -573,7 +573,7 @@ class LongitudinalMpc:
       #w_raw = (v_ego - low_thr) / max(1e-6, (high_thr - low_thr))
       #w_raw = v_ego / max(1e-6, (high_thr - low_thr))
       v_start_thr = 45 / 3.6
-      w_raw = v_ego / v_start_thr
+      w_raw = (v_ego - 3.0) / v_start_thr
       w = np.clip(w_raw, 0.12, 1.0)
       x_mixed = (1 - w) * np.min(x_and_cruise, axis=1) + w * np.max(x_and_cruise, axis=1)
       #x_mixed = 0.85 * np.min(x_and_cruise, axis=1) + 0.15 * np.max(x_and_cruise, axis=1)
