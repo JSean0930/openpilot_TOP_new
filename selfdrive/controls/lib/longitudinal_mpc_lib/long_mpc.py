@@ -432,7 +432,7 @@ class LongitudinalMpc:
       constraint_cost_weights = [LIMIT_COST, LIMIT_COST, LIMIT_COST, danger_cost]
     elif self.mode == 'blended':
       if v_ego <= high_thr:
-        j_comf *= 5.0 #10.0
+        j_comf *= 3.0 #5.0 / 10.0
       a_change_cost = 40.0 if prev_accel_constraint else 0
       cost_weights = [0., 0.1, 0.2, 5.0, a_change_cost, j_ego_v_ego * jerk_factor * j_comf]
       constraint_cost_weights = [LIMIT_COST, LIMIT_COST, LIMIT_COST, danger_cost]
