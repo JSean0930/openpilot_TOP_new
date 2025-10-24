@@ -88,7 +88,7 @@ _A_TOTAL_MAX_V = [1.7, 3.2]
 _A_TOTAL_MAX_BP = [20., 40.]
 
 # 紅燈偵測濾波門檻與參數（依模型路徑長度）
-THRESHOLD = 0.7
+THRESHOLD = 0.5 #0.7
 CRUISING_SPEED = 5.0  # m/s，推估模型前視路徑長度是否表示「要停」
 PLANNER_TIME = 10.0   # s，與上項相乘獲得「可行進距離」門檻（=50m）
 
