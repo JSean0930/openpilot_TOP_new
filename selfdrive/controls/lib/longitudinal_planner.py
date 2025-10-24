@@ -80,7 +80,7 @@ A_CRUISE_MIN_VALS_TOYOTA = [
 CONTROL_N_T_IDX = ModelConstants.T_IDXS[:CONTROL_N]
 
 # 模型油門允許判斷
-ALLOW_THROTTLE_THRESHOLD = 0.4   # 模型判斷踩油門的機率門檻（允許節氣門）/ 0.5
+ALLOW_THROTTLE_THRESHOLD = 0.3   # 模型判斷踩油門的機率門檻（允許節氣門）/ 0.5
 MIN_ALLOW_THROTTLE_SPEED = 4.0   # 低速例外（<= 此速時放寬油門允許）/ 2.5
 
 # 轉彎時的總加速度限制（sqrt(ax^2 + ay^2) <= a_total_max），以速度分段給定
