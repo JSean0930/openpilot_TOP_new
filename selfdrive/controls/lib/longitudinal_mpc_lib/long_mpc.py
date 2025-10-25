@@ -574,7 +574,7 @@ class LongitudinalMpc:
       #w_raw = (v_ego - low_thr) / max(1e-6, (high_thr - low_thr))
       #w_raw = v_ego / max(1e-6, (high_thr - low_thr))
       v_start_thr = 45 / 3.6
-      w_raw = (v_ego - 3.0) / v_start_thr
+      w_raw = v_ego / v_start_thr
       w = np.clip(w_raw, 0.12, 1.0)
       x_mixed = (1 - w) * np.min(x_and_cruise, axis=1) + w * np.max(x_and_cruise, axis=1)
       #x_mixed = 0.85 * np.min(x_and_cruise, axis=1) + 0.15 * np.max(x_and_cruise, axis=1)
