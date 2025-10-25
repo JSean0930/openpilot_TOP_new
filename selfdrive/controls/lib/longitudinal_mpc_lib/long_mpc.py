@@ -489,7 +489,8 @@ class LongitudinalMpc:
 
     # 有前車 → 使用 v_ego 函式；無前車 → 使用外部 v_cruise（原始邏輯）
     #v_cruise_cmd = get_dynamic_v_cruise(v_ego) if has_lead else float(v_cruise)
-    v_cruise_cmd = min(get_dynamic_v_cruise(v_ego), float(v_cruise)) if has_lead else float(v_cruise)
+    v_cruise_cmd = float(v_cruise)
+    #v_cruise_cmd = min(get_dynamic_v_cruise(v_ego), float(v_cruise)) if has_lead else float(v_cruise)
     #===================================================================
     t_follow = get_T_FOLLOW(personality) if not dynamic_follow else get_dynamic_follow(v_ego, personality)
     stop_distance = get_STOP_DISTANCE(personality)
