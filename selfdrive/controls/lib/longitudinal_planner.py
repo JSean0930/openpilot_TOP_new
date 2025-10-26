@@ -177,8 +177,8 @@ class LongitudinalPlanner(LongitudinalPlannerTOP):
       self.experimental_mode_active_by_traffic_light = False
 
       # 前車/紅燈判定用的閾值
-      self.LEAD_DISTANCE_THRESHOLD = 5.0
-      self.LEAD_SPEED_THRESHOLD = 3.0 * CV.KPH_TO_MS
+      self.LEAD_DISTANCE_THRESHOLD = 3.0#5.0
+      self.LEAD_SPEED_THRESHOLD = 1.5 * CV.KPH_TO_MS #3.0
 
       # 紅燈偵測濾波器（以模型前視距離是否近乎 0 代表將停止）
       self.red_light_filter = FirstOrderFilter(0, 1, self.dt)
