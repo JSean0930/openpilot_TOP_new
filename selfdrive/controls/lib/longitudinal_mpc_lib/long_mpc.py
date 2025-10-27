@@ -59,7 +59,7 @@ T_IDXS = (np.linspace(0, 1, N + 1) ** 1.65) * MAX_T
 #T_IDXS = np.array(T_IDXS_LST)
 FCW_IDXS = T_IDXS < 5.0
 T_DIFFS = np.diff(T_IDXS, prepend=[0.])
-COMFORT_BRAKE = 1.8
+COMFORT_BRAKE = 1.85
 # STOP_DISTANCE = 6.0
 CRUISE_MIN_ACCEL = -1.2
 CRUISE_MAX_ACCEL = 1.6
