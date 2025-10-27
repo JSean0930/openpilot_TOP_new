@@ -71,7 +71,7 @@ high_thr = 70.0 / 3.6
 #===================================================================
 def get_danger_zone_cost(v_ego):
   if v_ego <= low_thr:
-    return 150.0
+    return 250.0
   elif v_ego <= mid_thr:
     return 200.0
   else:
