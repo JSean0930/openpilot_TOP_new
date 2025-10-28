@@ -54,7 +54,7 @@ MIN_ANCHORS = {
 }
 
 # ========= 2) 由錨點生成“近線性”的密集 breakpoints =========
-def build_linear_profile(anchors, dense_step=1.0):
+def build_linear_profile(anchors, dense_step=0.5):
   """
   anchors: [(x0, y0), (x1, y1), ...] with x strictly increasing (單位 m/s)
   dense_step: 以多少 m/s 產生一個節點（1.0 m/s 已很夠用）
@@ -94,7 +94,7 @@ def compute_monotone_slopes(x, y):
       m[i] = (w1 + w2) / (w1/delta[i-1] + w2/delta[i])
 
   # 斜率限幅（可選）：抑制太尖銳的變化，讓“線性感”更穩
-  slope_limit = 5.0  # 依需要調
+  slope_limit = 7.0  # 依需要調
   m = np.clip(m, -slope_limit, slope_limit)
   return m
 
