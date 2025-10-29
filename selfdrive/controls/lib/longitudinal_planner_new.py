@@ -11,8 +11,8 @@ LongitudinalPlanner（E2E-only 可切換 + 簡易 FCW + 起步 Boost；檔頭布
 """
 
 # ====== 檔頭布林開關（直接改 True/False 即可）==========================================
-E2E_ONLY_ENABLED     = False   # True：完全以 modelV2 主導；False：維持 ACC/Blended
-SNG_E2E_ENABLED      = True    # True：紅燈/停等自動切 ExperimentalMode
+E2E_ONLY_ENABLED     = True   # True：完全以 modelV2 主導；False：維持 ACC/Blended
+SNG_E2E_ENABLED      = False    # True：紅燈/停等自動切 ExperimentalMode
 LAUNCH_BOOST_ENABLED = True    # True：啟用起步瞬間 Boost
 
 # ====== 起步 Boost 參數 ===============================================================
