@@ -13,8 +13,8 @@ LongitudinalPlanner（E2E-only 可切換 + 簡易 FCW + 起步 Boost；檔頭布
 
 # ====== 檔頭布林開關（直接改 True/False 即可）==========================================
 E2E_ONLY_ENABLED        = True   # True：完全以 modelV2 主導；False：維持 ACC/Blended
-E2E_ONLY_STRICT_LIMITS  = True    # True：E2E-only 保留 Toyota 上/下緣 + 轉彎限縮；False：只用 ACCEL_MIN/MAX
-SNG_E2E_ENABLED         = True    # True：紅燈/停等自動切 ExperimentalMode（若 E2E-only 且 STRICT=False → 跳過）
+E2E_ONLY_STRICT_LIMITS  = False    # True：E2E-only 保留 Toyota 上/下緣 + 轉彎限縮；False：只用 ACCEL_MIN/MAX
+SNG_E2E_ENABLED         = False    # True：紅燈/停等自動切 ExperimentalMode（若 E2E-only 且 STRICT=False → 跳過）
 LAUNCH_BOOST_ENABLED    = True    # True：啟用起步瞬間 Boost
 
 # ====== 起步 Boost 參數 ===============================================================
@@ -55,7 +55,7 @@ A_CRUISE_MAX_VALS_TOYOTA = [
   2.20, 2.09, 1.88, 1.55, 1.30, 1.15, 0.92, 0.63, 0.35, 0.283, 0.20
 ]
 A_CRUISE_MIN_VALS_TOYOTA = [
-  -1.20, -1.25, -1.30, -1.35, -1.40, -1.55, -1.70, -1.85, -2.00, -2.20, -2.40
+  -1.60, -1.65, -1.70, -1.75, -1.80, -1.95, -1.70, -1.85, -2.00, -2.20, -2.40
 ]
 
 CONTROL_N_T_IDX = ModelConstants.T_IDXS[:CONTROL_N]
