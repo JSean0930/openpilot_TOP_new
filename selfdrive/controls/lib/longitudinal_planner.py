@@ -14,11 +14,11 @@ LongitudinalPlanner（E2E-only 可切換 + 嚴格夾限開關 + 純E2E最小距�
 """
 
 # ====== 檔頭布林開關（直接改 True/False 即可）==========================================
-E2E_ONLY_ENABLED        = True   # True：完全以 modelV2 主導；False：維持 ACC/Blended
-E2E_ONLY_STRICT_LIMITS  = False  # True：E2E-only 保留 Toyota 上緣 + 轉彎限縮；False：只用 ACCEL_MIN/MAX
-SNG_E2E_ENABLED         = False  # True：紅燈/停等自動切 ExperimentalMode（若 E2E-only 且 STRICT=False → 跳過）
+E2E_ONLY_ENABLED        = False   # True：完全以 modelV2 主導；False：維持 ACC/Blended
+E2E_ONLY_STRICT_LIMITS  = Ture  # True：E2E-only 保留 Toyota 上緣 + 轉彎限縮；False：只用 ACCEL_MIN/MAX
+SNG_E2E_ENABLED         = Ture  # True：紅燈/停等自動切 ExperimentalMode（若 E2E-only 且 STRICT=False → 跳過）
 LAUNCH_BOOST_ENABLED    = True   # True：啟用起步瞬間 Boost
-E2E_MIN_GAP_LIMIT_ENABLED = True # True：純 E2E 下啟用最小距離上夾限
+E2E_MIN_GAP_LIMIT_ENABLED = False # True：純 E2E 下啟用最小距離上夾限
 
 # ====== 起步 Boost 參數 ===============================================================
 LAUNCH_BOOST_A = 0.25           # 每循環加上的加速度（m/s^2），建議 0.20～0.30
