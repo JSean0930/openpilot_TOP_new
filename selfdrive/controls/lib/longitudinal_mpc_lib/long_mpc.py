@@ -71,7 +71,7 @@ high_thr = 70.0 / 3.6
 #===================================================================
 def get_danger_zone_cost(v_ego):
   if v_ego <= low_thr:
-    return 250.0
+    return 150.0
   elif v_ego <= mid_thr:
     return 200.0
   else:
@@ -175,8 +175,8 @@ def get_dynamic_follow(v_ego, personality=log.LongitudinalPersonality.standard):
   # 低速人性化緩衝：停走/起步給更長一點距離，隨速度消退
   # 0→+0.25s, 5 km/h→+0.20s, 15 km/h→+0.00s
   #low_speed_boost = np.interp(v_kph, [0.0, 10.0, 50.0, 60.0], [-0.2, 0.0, 0.4, -0.4])
-  #low_speed_boost = np.interp(v_kph, [0.0, 10.0, 50.0, 60.0], [-0.3, -0.2, -0.2, 0.0])
-  low_speed_boost = np.interp(v_kph, [0.0, 10.0, 50.0, 60.0], [0.0, 0.0, 0.0, 0.0])
+  low_speed_boost = np.interp(v_kph, [0.0, 10.0, 50.0, 60.0], [-0.3, -0.2, -0.2, 0.0])
+  #low_speed_boost = np.interp(v_kph, [0.0, 10.0, 50.0, 60.0], [0.0, 0.0, 0.0, 0.0])
   t_follow = base + low_speed_boost
 
   return float(np.clip(t_follow, t_min, t_max))
