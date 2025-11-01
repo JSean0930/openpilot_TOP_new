@@ -50,7 +50,7 @@ MIN_ALLOW_THROTTLE_SPEED = 2.5
 _A_TOTAL_MAX_V = [1.7, 3.2]
 _A_TOTAL_MAX_BP = [20., 40.]
 
-THRESHOLD = 0.7
+THRESHOLD = 0.5#0.7
 CRUISING_SPEED = 5.0  # m/s
 PLANNER_TIME = 10.0  # s
 
@@ -112,7 +112,7 @@ class LongitudinalPlanner(LongitudinalPlannerTOP):
       self.STANDSTILL_TRANSIT_FRAMES = 10
       self.experimental_mode_active_by_standstill = False
       self.experimental_mode_active_by_traffic_light = False
-      self.LEAD_DISTANCE_THRESHOLD = 5.0
+      self.LEAD_DISTANCE_THRESHOLD = 2.0 #5.0
       self.LEAD_SPEED_THRESHOLD = 3.0 * CV.KPH_TO_MS
       self.red_light_filter = FirstOrderFilter(0, 1, self.dt)
       self.red_light_detected = False
