@@ -43,8 +43,8 @@ A_CRUISE_MAX_VALS_TOYOTA = [
 #A_CRUISE_MAX_BP_TOYOTA =     [0.,  1,   3.,   6.,    8.,  11., 15., 20., 25., 30., 55.]
 A_CRUISE_MAX_BP_TOYOTA = [0.0, 1.0, 3.0, 6.0, 8.33, 11.0, 15.0, 20.0, 25.0, 30.0, 36.11]
 CONTROL_N_T_IDX = ModelConstants.T_IDXS[:CONTROL_N]
-ALLOW_THROTTLE_THRESHOLD = 0.5
-MIN_ALLOW_THROTTLE_SPEED = 2.5
+ALLOW_THROTTLE_THRESHOLD = 0.3 #0.5
+MIN_ALLOW_THROTTLE_SPEED = 4.0 #2.5
 
 # Lookup table for turns
 _A_TOTAL_MAX_V = [1.7, 3.2]
@@ -112,7 +112,7 @@ class LongitudinalPlanner(LongitudinalPlannerTOP):
       self.STANDSTILL_TRANSIT_FRAMES = 10
       self.experimental_mode_active_by_standstill = False
       self.experimental_mode_active_by_traffic_light = False
-      self.LEAD_DISTANCE_THRESHOLD = 2.0 #5.0
+      self.LEAD_DISTANCE_THRESHOLD = 5.0
       self.LEAD_SPEED_THRESHOLD = 3.0 * CV.KPH_TO_MS
       self.red_light_filter = FirstOrderFilter(0, 1, self.dt)
       self.red_light_detected = False
