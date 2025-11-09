@@ -112,8 +112,8 @@ class LongitudinalPlanner(LongitudinalPlannerTOP):
       self.STANDSTILL_TRANSIT_FRAMES = 10
       self.experimental_mode_active_by_standstill = False
       self.experimental_mode_active_by_traffic_light = False
-      self.LEAD_DISTANCE_THRESHOLD = 5.0
-      self.LEAD_SPEED_THRESHOLD = 3.0 * CV.KPH_TO_MS
+      self.LEAD_DISTANCE_THRESHOLD = 2.0 #5.0
+      self.LEAD_SPEED_THRESHOLD = 1.0 * CV.KPH_TO_MS #3.0
       self.red_light_filter = FirstOrderFilter(0, 1, self.dt)
       self.red_light_detected = False
       self.model_length = 0
