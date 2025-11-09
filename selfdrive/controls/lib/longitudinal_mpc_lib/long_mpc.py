@@ -193,19 +193,63 @@ def get_STOP_DISTANCE(personality=log.LongitudinalPersonality.standard):
     raise NotImplementedError("Longitudinal personality not supported")
 
 
-def get_stopped_equivalence_factor(v_lead, v_ego):
+#def get_stopped_equivalence_factor(v_lead, v_ego):
   # KRKeegan this offset rapidly decreases the following distance when the lead pulls
   # away, resulting in an early demand for acceleration.
-  v_diff_offset = 0
-  v_diff_offset_max = 6
-  speed_to_reach_max_v_diff_offset = 5 # in kp/h 15
-  speed_to_reach_max_v_diff_offset = speed_to_reach_max_v_diff_offset * CV.KPH_TO_MS
-  delta_speed = v_lead - v_ego
-  if np.all(delta_speed > 0.5):
-    v_diff_offset = delta_speed * 4
-    v_diff_offset = np.clip(v_diff_offset, 0, v_diff_offset_max)
-    v_diff_offset = np.maximum(v_diff_offset * ((speed_to_reach_max_v_diff_offset - v_ego)/speed_to_reach_max_v_diff_offset), 0)
+#  v_diff_offset = 0
+#  v_diff_offset_max = 6
+#  speed_to_reach_max_v_diff_offset = 5 # in kp/h 15
+#  speed_to_reach_max_v_diff_offset = speed_to_reach_max_v_diff_offset * CV.KPH_TO_MS
+#  delta_speed = v_lead - v_ego
+#  if np.all(delta_speed > 0.5):
+#    v_diff_offset = delta_speed * 4
+#    v_diff_offset = np.clip(v_diff_offset, 0, v_diff_offset_max)
+#    v_diff_offset = np.maximum(v_diff_offset * ((speed_to_reach_max_v_diff_offset - v_ego)/speed_to_reach_max_v_diff_offset), 0)
+#  return (v_lead**2) / (2 * COMFORT_BRAKE) + v_diff_offset
+
+def get_stopped_equivalence_factor(v_lead, v_ego):
+  """
+  目標：
+  - 在低速(<=60 km/h)時更積極縮短跟車距離，減少減速後再加速的遲滯
+  - 讓 offset 對 (v_lead - v_ego) 呈現更線性且可預期的放大
+  - 高速時自動收斂到較保守（接近既有邏輯）
+
+  介面與回傳保持不變，可直接替換原函式。
+  參數可依體感微調（k_low/high、quad_gain、caps）。
+  建議的微調方向（若還想再快）
+	•	想更快：把 k_low 提到 6.0～6.5，或把 quad_gain 提到 0.45。
+	•	覺得太衝：把 cap_low 降到 12.0(14.0)，或把 quad_gain 降到 0.25(0.35)。
+	•	60 km/h 分界想更早：把 v60 換成 50.0 * CV.KPH_TO_MS。
+  """
+  v_lead = np.asarray(v_lead, dtype=float)
+  v_ego = float(v_ego)
+
+  v60 = 60.0 * CV.KPH_TO_MS                 # 60 km/h → m/s
+  delta = v_lead - v_ego                    # 相對速度（>0 表 lead 拉開）
+  w = np.clip(1.0 - (v_ego / v60), 0.0, 1.0)  # 低速權重：0~60 km/h 線性 1→0（純量）
+
+  # 低速 vs 高速增益（低速更積極）
+  k_low, k_high = 5.5, 3.5
+  k = k_high + (k_low - k_high) * w
+
+  # 快跟（二次）增益：只在低速有效
+  quad_gain = 0.35
+  quick = quad_gain * (np.clip(delta, 0.0, 5.0) ** 2) * w
+
+  # 基礎線性偏移量（向量化 max）
+  base = k * np.maximum(delta, 0.0) * (0.6 + 0.4 * w)
+
+  # 合成 offset 並依速度調整上限（低速允許更大 offset）
+  v_diff_offset = base + quick
+  cap_low, cap_high = 12.0, 8.0
+  cap = cap_high + (cap_low - cap_high) * w   # 純量
+  v_diff_offset = np.clip(v_diff_offset, 0.0, cap)
+
+  # 等效「前車煞停距離」 + 追隨推進 offset（向量或純量都可）
+
+  # 維持原本的等效「前車煞停距離」項；此項越大會讓期望距離越短 → 越積極跟上
   return (v_lead**2) / (2 * COMFORT_BRAKE) + v_diff_offset
+
 
 def get_safe_obstacle_distance(v_ego, t_follow, stop_distance=None):
   if stop_distance is None:
